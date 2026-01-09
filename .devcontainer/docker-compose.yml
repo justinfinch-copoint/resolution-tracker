@@ -1,0 +1,26 @@
+services:
+  devcontainer:
+    image: mcr.microsoft.com/devcontainers/python:3.12
+    volumes:
+      - ../..:/workspaces:cached
+    command: sleep infinity
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ResolutionTracker
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+
+volumes:
+  postgres-data:

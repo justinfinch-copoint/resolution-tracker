@@ -1,0 +1,33 @@
+{
+	"name": "Resolution Tracker",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "devcontainer",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"remoteUser": "root",
+
+	"features": {
+		"ghcr.io/devcontainers/features/node:1": {},
+		"ghcr.io/anthropics/devcontainer-features/claude-code:1": {}
+	},
+
+	"forwardPorts": [5432, 6379],
+
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"ms-azuretools.vscode-docker",
+				"ms-ossdata.vscode-pgsql",
+				"davidsekar.redis-xplorer",
+				"rangav.vscode-thunder-client",
+				"eamodio.gitlens",
+				"akamud.vscode-theme-onedark",
+				"pkief.material-icon-theme"
+			],
+			"settings": {
+				"workbench.colorTheme": "Atom One Dark",
+				"workbench.iconTheme": "material-icon-theme"
+			}
+		}
+	}
+}
