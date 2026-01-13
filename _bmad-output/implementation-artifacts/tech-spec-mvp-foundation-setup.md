@@ -2,7 +2,7 @@
 title: 'MVP Foundation Setup'
 slug: 'mvp-foundation-setup'
 created: '2026-01-13'
-status: 'ready-for-dev'
+status: 'completed'
 stepsCompleted: [1, 2, 3, 4]
 tech_stack:
   - Next.js 16.x (App Router)
@@ -141,19 +141,19 @@ Initialize the project using the official Supabase starter, configure Drizzle OR
 
 #### Phase 1: Project Initialization
 
-- [ ] **Task 1: Initialize Next.js project with Supabase starter**
+- [x] **Task 1: Initialize Next.js project with Supabase starter**
   - Command: `npx create-next-app -e with-supabase resolution-tracker`
   - Location: Run from `/workspaces/week1/`
   - Result: Creates `resolution-tracker/` directory with starter template
   - Notes: Accept defaults during prompts (TypeScript, ESLint, Tailwind, App Router)
 
-- [ ] **Task 2: Move app contents to workspace root (optional) OR work within resolution-tracker/**
+- [x] **Task 2: Move app contents to workspace root (optional) OR work within resolution-tracker/**
   - Decision: Keep app in `resolution-tracker/` subdirectory for clean separation from BMAD config
   - Action: All subsequent tasks assume working directory is `resolution-tracker/`
 
 #### Phase 2: Environment Configuration
 
-- [ ] **Task 3: Create environment files**
+- [x] **Task 3: Create environment files**
   - File: `resolution-tracker/.env.local`
   - Action: Create with local development values
   - Content:
@@ -169,26 +169,26 @@ Initialize the project using the official Supabase starter, configure Drizzle OR
     ANTHROPIC_API_KEY=your-api-key
     ```
 
-- [ ] **Task 4: Create .env.example template**
+- [x] **Task 4: Create .env.example template**
   - File: `resolution-tracker/.env.example`
   - Action: Copy of .env.local with placeholder values (no secrets)
   - Notes: This file IS committed to git
 
 #### Phase 3: Install Additional Dependencies
 
-- [ ] **Task 5: Install Drizzle ORM**
+- [x] **Task 5: Install Drizzle ORM**
   - Command: `npm install drizzle-orm postgres`
   - Command: `npm install -D drizzle-kit`
   - Location: `resolution-tracker/`
 
-- [ ] **Task 6: Install Vercel AI SDK**
+- [x] **Task 6: Install Vercel AI SDK**
   - Command: `npm install ai @ai-sdk/anthropic`
   - Location: `resolution-tracker/`
   - Notes: Installing now for future features, ensures versions are locked
 
 #### Phase 4: Create Folder Structure
 
-- [ ] **Task 7: Create vertical slice folder structure**
+- [x] **Task 7: Create vertical slice folder structure**
   - Location: `resolution-tracker/src/`
   - Action: Create directories:
     ```
@@ -220,7 +220,7 @@ Initialize the project using the official Supabase starter, configure Drizzle OR
 
 #### Phase 5: Database Setup
 
-- [ ] **Task 8: Create Drizzle configuration**
+- [x] **Task 8: Create Drizzle configuration**
   - File: `resolution-tracker/drizzle.config.ts`
   - Content:
     ```typescript
@@ -236,7 +236,7 @@ Initialize the project using the official Supabase starter, configure Drizzle OR
     });
     ```
 
-- [ ] **Task 9: Create database schema**
+- [x] **Task 9: Create database schema**
   - File: `resolution-tracker/src/db/schema.ts`
   - Action: Define all 5 tables using Drizzle schema syntax
   - Content:
@@ -291,7 +291,7 @@ Initialize the project using the official Supabase starter, configure Drizzle OR
     export type Integration = typeof integrations.$inferSelect;
     ```
 
-- [ ] **Task 10: Create Drizzle client**
+- [x] **Task 10: Create Drizzle client**
   - File: `resolution-tracker/src/db/index.ts`
   - Content:
     ```typescript
@@ -306,7 +306,7 @@ Initialize the project using the official Supabase starter, configure Drizzle OR
     export * from './schema';
     ```
 
-- [ ] **Task 11: Add database scripts to package.json**
+- [x] **Task 11: Add database scripts to package.json**
   - File: `resolution-tracker/package.json`
   - Action: Add scripts section entries:
     ```json
@@ -321,19 +321,19 @@ Initialize the project using the official Supabase starter, configure Drizzle OR
     }
     ```
 
-- [ ] **Task 12: Generate initial migration**
+- [x] **Task 12: Generate initial migration**
   - Command: `npm run db:generate`
   - Location: `resolution-tracker/`
   - Result: Creates `drizzle/migrations/0000_*.sql` file
 
-- [ ] **Task 13: Run initial migration**
+- [x] **Task 13: Run initial migration**
   - Command: `npm run db:migrate`
   - Location: `resolution-tracker/`
   - Result: Creates tables in Postgres database
 
 #### Phase 6: shadcn/ui Theme Configuration
 
-- [ ] **Task 14: Update Tailwind/shadcn theme with warm colors**
+- [x] **Task 14: Update Tailwind/shadcn theme with warm colors**
   - File: `resolution-tracker/src/app/globals.css`
   - Action: Update CSS variables in `:root` section:
     ```css
@@ -362,7 +362,7 @@ Initialize the project using the official Supabase starter, configure Drizzle OR
     ```
   - Notes: Dark mode variables can remain as starter defaults for now
 
-- [ ] **Task 15: Update tailwind.config.ts border radius**
+- [x] **Task 15: Update tailwind.config.ts border radius**
   - File: `resolution-tracker/tailwind.config.ts`
   - Action: Ensure border radius values support our design system:
     ```typescript
@@ -381,7 +381,7 @@ Initialize the project using the official Supabase starter, configure Drizzle OR
 
 #### Phase 7: CI/CD Setup
 
-- [ ] **Task 16: Create GitHub Actions CI workflow**
+- [x] **Task 16: Create GitHub Actions CI workflow**
   - File: `resolution-tracker/.github/workflows/ci.yml`
   - Content:
     ```yaml
@@ -422,7 +422,7 @@ Initialize the project using the official Supabase starter, configure Drizzle OR
 
 #### Phase 8: Seed Script
 
-- [ ] **Task 17: Create database seed script**
+- [x] **Task 17: Create database seed script**
   - File: `resolution-tracker/src/db/seed.ts`
   - Content:
     ```typescript
@@ -490,7 +490,7 @@ Initialize the project using the official Supabase starter, configure Drizzle OR
 
 #### Phase 9: Verification
 
-- [ ] **Task 18: Verify setup**
+- [x] **Task 18: Verify setup**
   - Command: `npm run build` (should pass with no errors)
   - Command: `npm run lint` (should pass)
   - Command: `npm run db:studio` (opens Drizzle Studio to verify tables)
@@ -502,28 +502,28 @@ Initialize the project using the official Supabase starter, configure Drizzle OR
 ### Acceptance Criteria
 
 #### Project Structure
-- [ ] **AC1:** Given the project is initialized, when I run `ls resolution-tracker/src/`, then I see `app/`, `db/`, `features/`, `shared/`, and `lib/` directories
-- [ ] **AC2:** Given the features folder exists, when I run `ls resolution-tracker/src/features/`, then I see `goals/`, `check-ins/`, `ai-coach/`, and `integrations/` directories
+- [x] **AC1:** Given the project is initialized, when I run `ls resolution-tracker/src/`, then I see `app/`, `db/`, `features/`, `shared/`, and `lib/` directories
+- [x] **AC2:** Given the features folder exists, when I run `ls resolution-tracker/src/features/`, then I see `goals/`, `check-ins/`, `ai-coach/`, and `integrations/` directories
 
 #### Database
-- [ ] **AC3:** Given the database is configured, when I run `npm run db:generate`, then a migration file is created in `drizzle/migrations/`
-- [ ] **AC4:** Given migrations exist, when I run `npm run db:migrate`, then tables are created in Postgres without errors
-- [ ] **AC5:** Given tables exist, when I run `npm run db:seed`, then test data is inserted and visible in `npm run db:studio`
-- [ ] **AC6:** Given the schema is defined, when I inspect the database, then I see tables: `goals`, `check_ins`, `user_summaries`, `integrations`
+- [x] **AC3:** Given the database is configured, when I run `npm run db:generate`, then a migration file is created in `drizzle/migrations/`
+- [x] **AC4:** Given migrations exist, when I run `npm run db:migrate`, then tables are created in Postgres without errors
+- [x] **AC5:** Given tables exist, when I run `npm run db:seed`, then test data is inserted and visible in `npm run db:studio`
+- [x] **AC6:** Given the schema is defined, when I inspect the database, then I see tables: `goals`, `check_ins`, `user_summaries`, `integrations`
 
 #### Environment
-- [ ] **AC7:** Given `.env.local` exists, when I run `npm run dev`, then the app starts without "missing environment variable" errors
-- [ ] **AC8:** Given `.env.example` exists, when I inspect it, then it contains all required variables with placeholder values (no secrets)
+- [x] **AC7:** Given `.env.local` exists, when I run `npm run dev`, then the app starts without "missing environment variable" errors
+- [x] **AC8:** Given `.env.example` exists, when I inspect it, then it contains all required variables with placeholder values (no secrets)
 
 #### Build & Lint
-- [ ] **AC9:** Given the project is set up, when I run `npm run build`, then it completes with no TypeScript errors
-- [ ] **AC10:** Given the project is set up, when I run `npm run lint`, then it completes with no ESLint errors
+- [x] **AC9:** Given the project is set up, when I run `npm run build`, then it completes with no TypeScript errors
+- [x] **AC10:** Given the project is set up, when I run `npm run lint`, then it completes with no ESLint errors
 
 #### Theme
-- [ ] **AC11:** Given globals.css is updated, when I view the app, then the background color is warm off-white (#FEFDFB), not pure white
+- [x] **AC11:** Given globals.css is updated, when I view the app, then the background color is warm off-white (#FEFDFB), not pure white
 
 #### CI
-- [ ] **AC12:** Given .github/workflows/ci.yml exists, when I push to main, then GitHub Actions runs build and lint checks
+- [x] **AC12:** Given .github/workflows/ci.yml exists, when I push to main, then GitHub Actions runs build and lint checks
 
 ## Additional Context
 
@@ -571,3 +571,27 @@ Initialize the project using the official Supabase starter, configure Drizzle OR
 - Schema designed upfront for all features to avoid breaking migrations later
 - All table names follow conventions to prevent inconsistency
 - Environment template ensures no developer forgets required variables
+
+---
+
+## Adversarial Review Findings
+
+**Review Date:** 2026-01-13
+**Resolution Approach:** Auto-fix real issues
+
+| ID | Severity | Validity | Description | Status |
+|----|----------|----------|-------------|--------|
+| F1 | CRITICAL | Real | No foreign key constraints - goalId/userId accept any UUID | Fixed |
+| F2 | HIGH | Real | No database indexes on user_id, goal_id, status columns | Fixed |
+| F3 | HIGH | Real | updatedAt columns only set on INSERT, never update | Fixed |
+| F4 | CRITICAL | Real | Seed script DELETEs all data with no environment check | Fixed |
+| F5 | MEDIUM | Real | Non-null assertions on DATABASE_URL - cryptic errors if missing | Fixed |
+| F6 | MEDIUM | Real | Status field is varchar, no enum or check constraint | Fixed |
+| F7 | HIGH | Deferred | Access tokens in plain text - security concern | Deferred to Auth spec |
+| F8 | LOW | Real | CI runs full build instead of tsc --noEmit | Fixed |
+| F9 | LOW | Noise | No tests | Out of scope per spec |
+| F10 | LOW | Noise | Dark mode doesn't match warm theme | Out of scope per spec |
+| F11 | MEDIUM | Real | Database connection pool not configured for serverless | Fixed |
+| F12 | LOW | Real | Missing NewUserSummary and NewIntegration type exports | Fixed |
+| F13 | MEDIUM | Real | JSONB columns have no type safety | Fixed |
+| F14 | MEDIUM | Deferred | Package uses 'latest' tags | Inherited from starter
