@@ -1,4 +1,4 @@
-import { db, goals, checkIns, userSummaries } from './index';
+import { db, goals, checkIns, userSummaries, profiles } from './index';
 
 // F4: Safety check to prevent accidental production data deletion
 function validateEnvironment() {
@@ -35,9 +35,18 @@ async function seed() {
   const testUserId = '00000000-0000-0000-0000-000000000001';
 
   // Clear existing data (for reset)
+  // Delete from leaf tables first for explicit control (profiles cascade would work too)
   await db.delete(checkIns);
   await db.delete(goals);
   await db.delete(userSummaries);
+  await db.delete(profiles);
+
+  // Create test profile first (FK constraint requires this)
+  await db.insert(profiles).values({
+    id: testUserId,
+    email: 'test@example.com',
+  });
+  console.log('Created test profile');
 
   // Seed goals
   const [goal1, goal2] = await db.insert(goals).values([

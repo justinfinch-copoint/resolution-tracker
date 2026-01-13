@@ -2,8 +2,9 @@
 title: 'Authentication - Magic Link Implementation'
 slug: 'auth-magic-link'
 created: '2026-01-13'
-status: 'ready-for-dev'
+status: 'completed'
 stepsCompleted: [1, 2, 3, 4]
+implementedAt: '2026-01-13'
 tech_stack:
   - Next.js 16.x (App Router)
   - Supabase Auth (@supabase/ssr for SSR)
@@ -26,7 +27,7 @@ files_to_modify:
   - 'DELETE: components/sign-up-form.tsx'
   - 'DELETE: components/forgot-password-form.tsx'
   - 'DELETE: components/update-password-form.tsx'
-  - 'CREATE: middleware.ts → route protection'
+  - 'UPDATE: lib/supabase/proxy.ts → route protection (Next.js 16 uses proxy.ts not middleware.ts)'
   - 'CREATE: app/auth/check-email/page.tsx → magic link sent confirmation'
   - 'UPDATE: _bmad-output/planning-artifacts/architecture.md'
   - 'UPDATE: _bmad-output/project-context.md'
@@ -209,7 +210,7 @@ export const config = {
 
 #### Phase 1: Remove Password-Based Auth (Clean Up)
 
-- [ ] **Task 1: Delete password-related pages**
+- [x] **Task 1: Delete password-related pages**
   - Files to delete:
     - `resolution-tracker/app/auth/sign-up/page.tsx`
     - `resolution-tracker/app/auth/sign-up-success/page.tsx`
@@ -218,7 +219,7 @@ export const config = {
   - Action: Delete these files and their parent directories if empty
   - Notes: These pages are for password flows we're removing
 
-- [ ] **Task 2: Delete password-related form components**
+- [x] **Task 2: Delete password-related form components**
   - Files to delete:
     - `resolution-tracker/components/sign-up-form.tsx`
     - `resolution-tracker/components/forgot-password-form.tsx`
@@ -228,7 +229,7 @@ export const config = {
 
 #### Phase 2: Database Schema - Profiles Table
 
-- [ ] **Task 3: Add profiles table to schema**
+- [x] **Task 3: Add profiles table to schema**
   - File: `resolution-tracker/src/db/schema.ts`
   - Action: Add profiles table that references auth.users
   - Implementation (add before goals table):
@@ -247,7 +248,7 @@ export const config = {
     ```
   - Notes: The `id` field must NOT have `defaultRandom()` - it must match the auth.users.id
 
-- [ ] **Task 4: Add FK constraints to existing tables**
+- [x] **Task 4: Add FK constraints to existing tables**
   - File: `resolution-tracker/src/db/schema.ts`
   - Action: Update goals, checkIns, userSummaries, integrations to reference profiles
   - Changes for each table's userId field:
@@ -265,7 +266,7 @@ export const config = {
     - `integrations` - add `.references(() => profiles.id, { onDelete: 'cascade' })`
   - Notes: Using `onDelete: 'cascade'` so if profile is deleted, all related data is cleaned up
 
-- [ ] **Task 5: Generate and run Drizzle migration**
+- [x] **Task 5: Generate and run Drizzle migration**
   - Location: `resolution-tracker/`
   - Commands:
     ```bash
@@ -275,7 +276,7 @@ export const config = {
   - Action: Generate migration for profiles table and FK constraints
   - Notes: Run AFTER Task 3 and Task 4 are complete
 
-- [ ] **Task 6: Update seed script for profiles**
+- [x] **Task 6: Update seed script for profiles**
   - File: `resolution-tracker/src/db/seed.ts`
   - Action: Add profile creation before seeding other data
   - Changes:
@@ -298,7 +299,7 @@ export const config = {
 
 #### Phase 3: Implement Magic Link Auth
 
-- [ ] **Task 7: Convert login form to magic link**
+- [x] **Task 7: Convert login form to magic link**
   - File: `resolution-tracker/components/login-form.tsx`
   - Action: Replace password-based login with magic link flow
   - Changes:
@@ -394,7 +395,7 @@ export const config = {
     }
     ```
 
-- [ ] **Task 8: Create check-email confirmation page**
+- [x] **Task 8: Create check-email confirmation page**
   - File: `resolution-tracker/app/auth/check-email/page.tsx` (NEW)
   - Action: Create a simple confirmation page shown after magic link request
   - Content:
@@ -431,7 +432,7 @@ export const config = {
     }
     ```
 
-- [ ] **Task 9: Update auth-button component**
+- [x] **Task 9: Update auth-button component**
   - File: `resolution-tracker/components/auth-button.tsx`
   - Action: Remove "Sign up" button, keep only "Sign in"
   - Change from:
@@ -454,7 +455,7 @@ export const config = {
 
 #### Phase 4: Add Route Protection & Profile Creation
 
-- [ ] **Task 10: Create middleware for route protection**
+- [x] **Task 10: Create middleware for route protection**
   - File: `resolution-tracker/middleware.ts` (NEW)
   - Action: Create Next.js middleware to protect `/protected/*` routes
   - Implementation:
@@ -508,7 +509,7 @@ export const config = {
     };
     ```
 
-- [ ] **Task 11: Update confirm route with profile upsert**
+- [x] **Task 11: Update confirm route with profile upsert**
   - File: `resolution-tracker/app/auth/confirm/route.ts`
   - Action: Add profile creation after successful auth verification
   - Full implementation:
@@ -568,7 +569,7 @@ export const config = {
 
 #### Phase 5: Update Documentation
 
-- [ ] **Task 12: Update architecture.md**
+- [x] **Task 12: Update architecture.md**
   - File: `_bmad-output/planning-artifacts/architecture.md`
   - Action: Replace all references to `(dashboard)/` with `/protected` and add profiles table to data model
   - Changes:
@@ -581,7 +582,7 @@ export const config = {
     | `profiles` | Links auth.users to public schema | id (matches auth.users.id), email, created_at |
     ```
 
-- [ ] **Task 13: Update project-context.md**
+- [x] **Task 13: Update project-context.md**
   - File: `_bmad-output/project-context.md`
   - Action: Update Auth Rules section and add profiles info
   - Change Auth Rules to:
@@ -598,12 +599,12 @@ export const config = {
 
 #### Phase 6: Verification
 
-- [ ] **Task 14: Verify build passes**
+- [x] **Task 14: Verify build passes**
   - Command: `npm run build` in `resolution-tracker/`
   - Action: Ensure no TypeScript errors from removed files or schema changes
   - Notes: If imports to deleted files exist, they'll surface here
 
-- [ ] **Task 15: Manual auth flow test**
+- [x] **Task 15: Manual auth flow test**
   - Action: Test complete magic link flow with profile creation
   - Steps:
     1. Navigate to `/auth/login`
@@ -620,30 +621,30 @@ export const config = {
 ### Acceptance Criteria
 
 #### Profiles & Database
-- [ ] **AC1:** Given the schema is updated, when I inspect the database, then I see a `profiles` table with columns: id, email, created_at, updated_at
-- [ ] **AC2:** Given the schema is updated, when I inspect the `goals` table, then the `user_id` column has a foreign key constraint to `profiles.id`
-- [ ] **AC3:** Given a new user signs up via magic link, when the auth completes, then a profile record is automatically created in the `profiles` table with matching id and email
-- [ ] **AC4:** Given an existing user signs in via magic link, when the auth completes, then no duplicate profile is created (upsert behavior)
+- [x] **AC1:** Given the schema is updated, when I inspect the database, then I see a `profiles` table with columns: id, email, created_at, updated_at
+- [x] **AC2:** Given the schema is updated, when I inspect the `goals` table, then the `user_id` column has a foreign key constraint to `profiles.id`
+- [x] **AC3:** Given a new user signs up via magic link, when the auth completes, then a profile record is automatically created in the `profiles` table with matching id and email
+- [x] **AC4:** Given an existing user signs in via magic link, when the auth completes, then no duplicate profile is created (upsert behavior)
 
 #### Magic Link Flow
-- [ ] **AC5:** Given a user on `/auth/login`, when they enter their email and click "Send magic link", then they are redirected to `/auth/check-email` and receive an email with a login link
-- [ ] **AC6:** Given a user clicks the magic link in their email, when the link is valid, then they are redirected to `/protected` and see their user details
-- [ ] **AC7:** Given a user clicks an expired or invalid magic link, when verification fails, then they are redirected to `/auth/error` with an error message
+- [x] **AC5:** Given a user on `/auth/login`, when they enter their email and click "Send magic link", then they are redirected to `/auth/check-email` and receive an email with a login link
+- [x] **AC6:** Given a user clicks the magic link in their email, when the link is valid, then they are redirected to `/protected` and see their user details
+- [x] **AC7:** Given a user clicks an expired or invalid magic link, when verification fails, then they are redirected to `/auth/error` with an error message
 
 #### Route Protection
-- [ ] **AC8:** Given an unauthenticated user, when they navigate to `/protected`, then they are redirected to `/auth/login`
-- [ ] **AC9:** Given an authenticated user, when they navigate to `/protected`, then they see the protected page content
+- [x] **AC8:** Given an unauthenticated user, when they navigate to `/protected`, then they are redirected to `/auth/login`
+- [x] **AC9:** Given an authenticated user, when they navigate to `/protected`, then they see the protected page content
 
 #### Password Auth Removal
-- [ ] **AC10:** Given the updated codebase, when a user navigates to `/auth/sign-up`, then they receive a 404 error
-- [ ] **AC11:** Given the updated codebase, when a user navigates to `/auth/forgot-password`, then they receive a 404 error
-- [ ] **AC12:** Given the login page, when rendered, then there is no password field and no "Sign up" link
+- [x] **AC10:** Given the updated codebase, when a user navigates to `/auth/sign-up`, then they receive a 404 error
+- [x] **AC11:** Given the updated codebase, when a user navigates to `/auth/forgot-password`, then they receive a 404 error
+- [x] **AC12:** Given the login page, when rendered, then there is no password field and no "Sign up" link
 
 #### Logout
-- [ ] **AC13:** Given an authenticated user on `/protected`, when they click "Logout", then they are signed out and redirected to `/auth/login`
+- [x] **AC13:** Given an authenticated user on `/protected`, when they click "Logout", then they are signed out and redirected to `/auth/login`
 
 #### Build
-- [ ] **AC14:** Given all changes are complete, when `npm run build` is run, then the build completes with no errors
+- [x] **AC14:** Given all changes are complete, when `npm run build` is run, then the build completes with no errors
 
 ## Additional Context
 
@@ -744,3 +745,26 @@ WHERE tc.constraint_type = 'FOREIGN KEY'
 - Social auth providers (Google, GitHub)
 - Profile management UI (name, avatar, preferences)
 - Cleanup job for orphaned profiles when auth user is deleted
+
+---
+
+## Review Notes
+
+**Adversarial Review Completed:** 2026-01-13
+
+**Findings:** 10 total, 4 fixed, 6 deferred
+
+| ID | Severity | Status | Description |
+|----|----------|--------|-------------|
+| F1 | High | Fixed | Added error handling for profile upsert in confirm route |
+| F2 | Medium | Verified | Link import removal confirmed clean |
+| F3 | High | Fixed | Removed seed data from migration, cleared DB |
+| F4 | Medium | Fixed | Seed script delete order corrected |
+| F5 | Low | Deferred | Loading feedback on check-email page (future enhancement) |
+| F6 | Medium | Deferred | Unit tests for auth logic (separate task) |
+| F7 | Low | Fixed | Updated architecture.md proxy.ts reference |
+| F8 | Medium | Deferred | Server-side email validation (Supabase handles) |
+| F9 | Low | Deferred | Manual test documentation |
+| F10 | Medium | Deferred | Rate limiting (Supabase has built-in limits) |
+
+**Resolution Approach:** Selective fix of High/Medium issues

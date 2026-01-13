@@ -3,6 +3,14 @@ import { pgTable, uuid, text, timestamp, jsonb, index, pgEnum } from 'drizzle-or
 // F6: Status enum for type safety
 export const goalStatusEnum = pgEnum('goal_status', ['active', 'completed', 'paused', 'abandoned']);
 
+// Profiles table - links auth.users to our public schema
+export const profiles = pgTable('profiles', {
+  id: uuid('id').primaryKey(), // matches auth.users.id, NOT defaultRandom()
+  email: text('email'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow().$onUpdate(() => new Date()),
+});
+
 // F13: Type definitions for JSONB columns
 export type UserSummaryData = {
   patterns?: string[];
@@ -21,7 +29,7 @@ export type IntegrationConfig = {
 // Goals table
 export const goals = pgTable('goals', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').notNull(),
+  userId: uuid('user_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
   title: text('title').notNull(),
   status: goalStatusEnum('status').notNull().default('active'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -35,7 +43,7 @@ export const goals = pgTable('goals', {
 // Check-ins table
 export const checkIns = pgTable('check_ins', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').notNull(),
+  userId: uuid('user_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
   goalId: uuid('goal_id').references(() => goals.id, { onDelete: 'set null' }), // F1: Foreign key
   content: text('content').notNull(),
   aiResponse: text('ai_response'),
@@ -49,7 +57,7 @@ export const checkIns = pgTable('check_ins', {
 // User summaries table (AI context memory)
 export const userSummaries = pgTable('user_summaries', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').notNull().unique(),
+  userId: uuid('user_id').notNull().unique().references(() => profiles.id, { onDelete: 'cascade' }),
   summaryJson: jsonb('summary_json').$type<UserSummaryData>().notNull().default({}),
   updatedAt: timestamp('updated_at').notNull().defaultNow().$onUpdate(() => new Date()),
 });
@@ -60,7 +68,7 @@ export const integrationTypeEnum = pgEnum('integration_type', ['notion', 'zapier
 // Integrations table
 export const integrations = pgTable('integrations', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').notNull(),
+  userId: uuid('user_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
   type: integrationTypeEnum('type').notNull(),
   accessToken: text('access_token'),
   configJson: jsonb('config_json').$type<IntegrationConfig>().notNull().default({}),
@@ -72,6 +80,8 @@ export const integrations = pgTable('integrations', {
 ]);
 
 // Type exports for use in features
+export type Profile = typeof profiles.$inferSelect;
+export type NewProfile = typeof profiles.$inferInsert;
 export type Goal = typeof goals.$inferSelect;
 export type NewGoal = typeof goals.$inferInsert;
 export type CheckIn = typeof checkIns.$inferSelect;

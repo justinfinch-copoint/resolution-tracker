@@ -46,8 +46,81 @@ cp .env.example .env.local
 Configure your environment variables:
 - `DATABASE_URL` - PostgreSQL connection string
 - `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anon key
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` - Supabase publishable/anon key
 - `ANTHROPIC_API_KEY` - Claude API key
+
+### Supabase Authentication Setup
+
+This app uses **magic link (passwordless) authentication** via Supabase. Follow these steps to configure it:
+
+#### 1. Create a Supabase Project
+
+1. Go to [supabase.com](https://supabase.com) and create an account
+2. Click "New Project" and fill in:
+   - Project name: `resolution-tracker` (or your preference)
+   - Database password: Generate a strong password (save this)
+   - Region: Choose closest to your users
+3. Wait for the project to finish provisioning (~2 minutes)
+
+#### 2. Get Your API Keys
+
+1. In your Supabase dashboard, go to **Settings > API**
+2. Copy these values to your `.env.local`:
+
+```bash
+# From "Project URL"
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+
+# From "anon public" or "publishable" key (safe to expose in browser)
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+#### 3. Enable Magic Link Authentication
+
+1. Go to **Authentication > Providers**
+2. Under **Email**, ensure it's enabled
+3. Verify these settings:
+   - **Enable Email provider**: ON
+   - **Confirm email**: ON (recommended) or OFF for faster dev testing
+   - **Secure email change**: ON
+
+#### 4. Configure Redirect URLs
+
+1. Go to **Authentication > URL Configuration**
+2. Add these to **Redirect URLs**:
+
+```
+# Local development
+http://localhost:3000/auth/confirm
+
+# Production (add when deploying)
+https://your-domain.com/auth/confirm
+```
+
+#### 5. (Optional) Customize Email Templates
+
+1. Go to **Authentication > Email Templates**
+2. Select "Magic Link" template
+3. Customize the email content and branding as needed
+
+#### Environment Variables Summary
+
+| Variable | Where to Find | Description |
+|----------|---------------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Settings > API > Project URL | Your Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Settings > API > anon/publishable | Public key for browser client |
+| `DATABASE_URL` | Settings > Database > Connection string | For Drizzle ORM (use "URI" format) |
+
+**Note:** For local development with the devcontainer, `DATABASE_URL` points to the local Postgres container (`postgresql://postgres:postgres@db:5432/ResolutionTracker`). The Supabase URL/key are still needed for authentication.
+
+#### Testing Authentication
+
+1. Start the dev server: `npm run dev`
+2. Navigate to `http://localhost:3000/auth/login`
+3. Enter your email and click "Send magic link"
+4. Check your email (or Supabase dashboard > Authentication > Users for the link)
+5. Click the magic link to authenticate
+6. You should be redirected to `/protected`
 
 ### Database
 

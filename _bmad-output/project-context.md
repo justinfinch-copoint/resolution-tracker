@@ -72,10 +72,12 @@ _Critical rules and patterns for implementing Resolution Tracker. Focus on unobv
 
 ### Auth Rules
 
-- Supabase Auth with magic links only
-- Protected routes in `(dashboard)/` route group
-- Auth check in `middleware.ts`
-- Local dev: auth is mocked/bypassed
+- Supabase Auth with magic links only (no passwords)
+- Protected routes under `/protected/*`
+- Auth check in `lib/supabase/proxy.ts` (redirects to `/auth/login`)
+- Local dev uses real Supabase auth (no mocking)
+- Profiles created via app-level upsert in auth confirm route
+- All user data tables have FK to profiles.id with cascade delete
 
 ---
 

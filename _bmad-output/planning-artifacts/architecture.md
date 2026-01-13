@@ -116,10 +116,11 @@ npx create-next-app -e with-supabase resolution-tracker
 | Entity | Purpose | Key Fields |
 |--------|---------|------------|
 | `users` | Managed by Supabase Auth | id, email, created_at |
-| `goals` | User's resolutions | id, user_id, title, status, created_at |
-| `check_ins` | Conversation entries | id, user_id, goal_id (nullable), content, ai_response, created_at |
-| `user_summaries` | AI context memory | id, user_id, summary_json, updated_at |
-| `integrations` | Notion/Zapier configs | id, user_id, type, access_token, config_json |
+| `profiles` | Links auth.users to public schema | id (matches auth.users.id), email, created_at |
+| `goals` | User's resolutions | id, user_id (FK to profiles), title, status, created_at |
+| `check_ins` | Conversation entries | id, user_id (FK to profiles), goal_id (nullable), content, ai_response, created_at |
+| `user_summaries` | AI context memory | id, user_id (FK to profiles), summary_json, updated_at |
+| `integrations` | Notion/Zapier configs | id, user_id (FK to profiles), type, access_token, config_json |
 
 **Key Decisions:**
 - **Goal reference on check-ins:** Optional (supports general check-ins like "feeling motivated")
@@ -191,7 +192,7 @@ src/
 
 **Session Handling:**
 - Cookie-based sessions via `supabase-ssr`
-- Middleware protects `(dashboard)/` routes
+- Proxy (`lib/supabase/proxy.ts`) protects `/protected/*` routes (Next.js 16 pattern)
 - No special timeout or remember-me logic for MVP
 
 ### Decision 5: Integration Architecture
@@ -609,12 +610,12 @@ resolution-tracker/
 
 | Feature | Location |
 |---------|----------|
-| **Goal Management** | `features/goals/` + `app/(dashboard)/goals/` + `app/api/goals/` |
-| **Check-ins & AI** | `features/check-ins/` + `features/ai-coach/` + `app/(dashboard)/check-in/` |
+| **Goal Management** | `features/goals/` + `app/protected/goals/` + `app/api/goals/` |
+| **Check-ins & AI** | `features/check-ins/` + `features/ai-coach/` + `app/protected/check-in/` |
 | **Notion Integration** | `features/integrations/notion/` + `app/api/integrations/notion/` |
 | **Zapier Webhooks** | `features/integrations/zapier/` + `app/api/integrations/zapier/` |
-| **Auth** | `app/(auth)/` + `shared/auth/` + `middleware.ts` |
-| **Database** | `db/schema.ts` + `drizzle/migrations/` |
+| **Auth** | `app/auth/` + `lib/supabase/proxy.ts` |
+| **Database** | `db/schema.ts` + `drizzle/migrations/` + `profiles` table |
 
 ### Architectural Boundaries
 
