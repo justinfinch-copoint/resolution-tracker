@@ -1,44 +1,28 @@
 # Workflow Status - Resolution Tracker
-# BMad Method tracking file for Analysis, Planning, and Solutioning phases
-# Implementation phase tracked separately in sprint-status.yaml
+# Streamlined spec-driven development flow
 
 # STATUS DEFINITIONS:
 # ==================
 # Initial Status (before completion):
 #   - required: Must be completed to progress
 #   - optional: Can be completed but not required
-#   - recommended: Strongly suggested but not required
-#   - conditional: Required only if certain conditions met (e.g., if_has_ui)
-#   - skipped: User chose not to include this workflow
+#   - conditional: Required only if certain conditions met
 #
 # Completion Status:
 #   - {file-path}: File created/found (replaces initial status)
-#   - skipped: Optional/conditional workflow that was skipped
 
 generated: "2026-01-08"
 project: "Resolution Tracker"
 project_type: "personal-ai-app"
-selected_track: "method"
+selected_track: "spec-driven"
 field_type: "greenfield"
-workflow_path: "method-greenfield.yaml"
+workflow_path: "custom-streamlined.yaml"
 
 workflow_status:
   # Phase 1: Analysis (Optional)
   - phase: 1
     name: "Analysis"
     workflows:
-      - id: "brainstorm"
-        name: "Brainstorm"
-        status: "skipped"
-        agent: "analyst"
-        command: "/bmad:core:workflows:brainstorming"
-
-      - id: "research"
-        name: "Research"
-        status: "skipped"
-        agent: "analyst"
-        command: "/bmad:bmm:workflows:research"
-
       - id: "product-brief"
         name: "Product Brief"
         status: "_bmad-output/planning-artifacts/product-brief-week1-2026-01-08.md"
@@ -52,10 +36,10 @@ workflow_status:
     workflows:
       - id: "prd"
         name: "PRD"
-        status: "required"
+        status: "_bmad-output/planning-artifacts/prd.md"
         agent: "pm"
         command: "/bmad:bmm:workflows:create-prd"
-        output: "Product Requirements Document with FRs and NFRs"
+        completed: "2026-01-09"
 
       - id: "ux-design"
         name: "UX Design"
@@ -63,7 +47,7 @@ workflow_status:
         condition: "if_has_ui"
         agent: "ux-designer"
         command: "/bmad:bmm:workflows:create-ux-design"
-        note: "Determined after PRD - user/agent decides if needed"
+        note: "Optional - decide after Architecture"
 
   # Phase 3: Solutioning
   - phase: 3
@@ -76,34 +60,27 @@ workflow_status:
         command: "/bmad:bmm:workflows:create-architecture"
         output: "System architecture document"
 
-      - id: "epics-and-stories"
-        name: "Epics & Stories"
+      - id: "tech-spec"
+        name: "Tech Spec"
         status: "required"
-        agent: "pm"
-        command: "/bmad:bmm:workflows:create-epics-and-stories"
-        note: "Break down PRD into implementable epics and stories"
-
-      - id: "test-design"
-        name: "Test Design"
-        status: "optional"
-        agent: "tea"
-        command: "/bmad:bmm:workflows:testarch-test-design"
-        output: "System-level testability review"
+        agent: "architect"
+        command: "/bmad:bmm:workflows:create-tech-spec"
+        note: "Implementation-ready spec for each feature/component"
 
       - id: "implementation-readiness"
         name: "Implementation Readiness"
-        status: "required"
+        status: "optional"
         agent: "architect"
         command: "/bmad:bmm:workflows:check-implementation-readiness"
-        note: "Validates PRD + Architecture + Epics + UX alignment"
+        note: "Quick sanity check before building"
 
   # Phase 4: Implementation
   - phase: 4
     name: "Implementation"
     workflows:
-      - id: "sprint-planning"
-        name: "Sprint Planning"
+      - id: "quick-dev"
+        name: "Quick Dev"
         status: "required"
-        agent: "sm"
-        command: "/bmad:bmm:workflows:sprint-planning"
-        note: "Creates sprint plan - subsequent work tracked in sprint-status.yaml"
+        agent: "dev"
+        command: "/bmad:bmm:workflows:quick-dev"
+        note: "Execute tech-specs - repeat per spec"
