@@ -10,7 +10,7 @@
 		"ghcr.io/anthropics/devcontainer-features/claude-code:1": {}
 	},
 
-	"forwardPorts": [5432, 6379],
+	"forwardPorts": [5432, 6379, 4983],
 
 	"customizations": {
 		"vscode": {
