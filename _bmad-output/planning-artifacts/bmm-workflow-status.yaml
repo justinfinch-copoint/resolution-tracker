@@ -43,11 +43,11 @@ workflow_status:
 
       - id: "ux-design"
         name: "UX Design"
-        status: "conditional"
+        status: "_bmad-output/planning-artifacts/ux-design-specification.md"
         condition: "if_has_ui"
         agent: "ux-designer"
         command: "/bmad:bmm:workflows:create-ux-design"
-        note: "Optional - decide after Architecture"
+        completed: "2026-01-13"
 
   # Phase 3: Solutioning
   - phase: 3
