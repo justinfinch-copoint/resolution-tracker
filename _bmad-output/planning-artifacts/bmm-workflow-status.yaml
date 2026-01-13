@@ -55,10 +55,11 @@ workflow_status:
     workflows:
       - id: "architecture"
         name: "Architecture"
-        status: "required"
+        status: "_bmad-output/planning-artifacts/architecture.md"
         agent: "architect"
         command: "/bmad:bmm:workflows:create-architecture"
         output: "System architecture document"
+        completed: "2026-01-13"
 
       - id: "tech-spec"
         name: "Tech Spec"
