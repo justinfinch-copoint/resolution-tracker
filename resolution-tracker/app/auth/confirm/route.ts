@@ -9,44 +9,43 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
+  const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/protected";
 
-  if (token_hash && type) {
-    const supabase = await createClient();
+  const supabase = await createClient();
 
-    const { error } = await supabase.auth.verifyOtp({
-      type,
-      token_hash,
-    });
-
-    if (!error) {
-      // Get the authenticated user
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (user) {
-        // Upsert profile - create if not exists, do nothing if exists
-        try {
-          await db
-            .insert(profiles)
-            .values({
-              id: user.id,
-              email: user.email,
-            })
-            .onConflictDoNothing();
-        } catch (profileError) {
-          // Log error but don't block auth - user can still proceed
-          console.error("Failed to create profile:", profileError);
-        }
-      }
-
-      // redirect user to specified redirect URL or protected area
-      redirect(next);
-    } else {
-      // redirect the user to an error page with some instructions
-      redirect(`/auth/error?error=${error?.message}`);
+  // Handle PKCE flow (magic link with code parameter)
+  if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) {
+      redirect(`/auth/error?error=${encodeURIComponent(error.message)}`);
     }
   }
 
-  // redirect the user to an error page with some instructions
-  redirect(`/auth/error?error=No token hash or type`);
+  // Handle OTP verification flow (token_hash and type parameters)
+  if (token_hash && type) {
+    const { error } = await supabase.auth.verifyOtp({ type, token_hash });
+    if (error) {
+      redirect(`/auth/error?error=${encodeURIComponent(error.message)}`);
+    }
+  }
+
+  // Check if user is authenticated
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (user) {
+    // Create profile if it doesn't exist (idempotent)
+    try {
+      await db
+        .insert(profiles)
+        .values({ id: user.id, email: user.email })
+        .onConflictDoNothing();
+    } catch {
+      // Profile creation is non-blocking - user can still proceed
+    }
+
+    redirect(next);
+  }
+
+  redirect(`/auth/error?error=${encodeURIComponent("Authentication failed. Please try signing in again.")}`);
 }
