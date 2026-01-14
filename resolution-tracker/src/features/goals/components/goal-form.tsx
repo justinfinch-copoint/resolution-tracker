@@ -46,7 +46,7 @@ export function GoalForm({ mode, goal, onSubmit, onCancel, disabled }: GoalFormP
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit}>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-6">
             <div className="grid gap-2">
               <Label htmlFor="title">Goal Title</Label>
               <Input
@@ -58,7 +58,7 @@ export function GoalForm({ mode, goal, onSubmit, onCancel, disabled }: GoalFormP
                 disabled={disabled || isLoading}
               />
             </div>
-            {error && <p className="text-sm text-red-500">{error}</p>}
+            {error && <p className="text-sm text-destructive">{error}</p>}
             <div className="flex gap-2">
               <Button type="submit" disabled={disabled || isLoading}>
                 {isLoading ? 'Saving...' : mode === 'create' ? 'Add Goal' : 'Save Changes'}

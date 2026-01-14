@@ -1,7 +1,6 @@
 'use client';
 
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -15,8 +14,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Pencil, Trash2, Circle } from 'lucide-react';
 import type { GoalResponse } from '../types';
-// F14: Use centralized status definitions
 import { STATUS_CONFIG, GOAL_STATUSES, type GoalStatusValue } from '../types';
+import { cn } from '@/lib/utils';
 
 type GoalCardProps = {
   goal: GoalResponse;
@@ -27,9 +26,8 @@ type GoalCardProps = {
 };
 
 export function GoalCard({ goal, onEdit, onDelete, onStatusChange, disabled }: GoalCardProps) {
-  const { label, variant } = STATUS_CONFIG[goal.status as GoalStatusValue];
+  const isCompleted = goal.status === 'completed';
 
-  // F8: Delete confirmation
   const handleDelete = () => {
     if (window.confirm(`Are you sure you want to delete "${goal.title}"? This cannot be undone.`)) {
       onDelete(goal.id);
@@ -37,15 +35,20 @@ export function GoalCard({ goal, onEdit, onDelete, onStatusChange, disabled }: G
   };
 
   return (
-    <Card className={disabled ? 'opacity-50' : ''}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <div className="flex items-center gap-3">
-          <CardTitle className="text-lg">{goal.title}</CardTitle>
-          <Badge variant={variant}>{label}</Badge>
-        </div>
+    <Card className={cn(
+      disabled && 'opacity-50',
+      isCompleted && 'opacity-70'
+    )}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 py-4">
+        <CardTitle className={cn(
+          "text-lg font-medium",
+          isCompleted && "line-through text-muted-foreground"
+        )}>
+          {goal.title}
+        </CardTitle>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8" disabled={disabled}>
+            <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" disabled={disabled}>
               <MoreHorizontal className="h-4 w-4" />
               <span className="sr-only">Open menu</span>
             </Button>

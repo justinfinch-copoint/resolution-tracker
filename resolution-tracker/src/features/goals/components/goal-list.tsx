@@ -187,13 +187,14 @@ export function GoalList() {
       )}
 
       {goals.length === 0 ? (
-        <div className="rounded-md border border-dashed p-8 text-center">
+        <div className="rounded-2xl border border-dashed p-8 text-center">
+          <p className="text-lg font-medium text-foreground mb-2">No goals yet</p>
           <p className="text-muted-foreground">
-            No goals yet. Start by adding your first resolution!
+            Ready when you are. Add your first goal to get started.
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {goals.map((goal) => (
             <GoalCard
               key={goal.id}

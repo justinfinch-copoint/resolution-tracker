@@ -1,46 +1,21 @@
-import { EnvVarWarning } from "@/components/env-var-warning";
-import { AuthButton } from "@/components/auth-button";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { hasEnvVars } from "@/lib/utils";
 import Link from "next/link";
-import { Suspense } from "react";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex flex-col items-center">
-      <div className="flex-1 w-full flex flex-col gap-20 items-center">
-        <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-          <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
-            <div className="flex gap-5 items-center font-semibold">
-              <Link href={"/"}>Resolution Tracker</Link>
-            </div>
-            {!hasEnvVars ? (
-              <EnvVarWarning />
-            ) : (
-              <Suspense>
-                <AuthButton />
-              </Suspense>
-            )}
-          </div>
-        </nav>
-        <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
-          <div className="flex flex-col gap-6 items-center text-center">
-            <h1 className="text-4xl font-bold">Resolution Tracker</h1>
-            <p className="text-muted-foreground max-w-md">
-              Track your goals and resolutions with AI-powered coaching.
-            </p>
-            <Link
-              href="/auth/login"
-              className="bg-primary text-primary-foreground px-6 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
-            >
-              Get Started
-            </Link>
-          </div>
+    <main className="min-h-screen flex flex-col items-center justify-center bg-background px-4">
+      <div className="w-full max-w-[600px] flex flex-col items-center text-center gap-8">
+        <div className="flex flex-col gap-4">
+          <h1 className="text-3xl font-bold text-foreground">
+            Keep your resolutions, your way
+          </h1>
+          <p className="text-lg text-muted-foreground leading-relaxed">
+            Your friendly companion for building habits that stick. No guilt, just gentle nudges to help you stay on track.
+          </p>
         </div>
-
-        <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-          <ThemeSwitcher />
-        </footer>
+        <Button asChild size="lg">
+          <Link href="/auth/login">Get Started</Link>
+        </Button>
       </div>
     </main>
   );

@@ -47,22 +47,29 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
-  // Protect /protected/* routes - redirect unauthenticated users to login
-  if (!user && request.nextUrl.pathname.startsWith("/protected")) {
+  const pathname = request.nextUrl.pathname;
+
+  // Home page: redirect authenticated users to default protected page
+  if (pathname === "/") {
+    if (user) {
+      const targetPage = process.env.DEFAULT_PROTECTED_PAGE ?? DEFAULT_PROTECTED_PAGE_FALLBACK;
+      if (targetPage !== "/") {
+        const url = request.nextUrl.clone();
+        url.pathname = targetPage;
+        return NextResponse.redirect(url);
+      }
+    }
+    // Allow unauthenticated users to see home page
+    return supabaseResponse;
+  }
+
+  // All other routes: require authentication (default deny)
+  // The matcher already excludes /auth/* and /api/*, so if we're here,
+  // this is a protected route.
+  if (!user) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);
-  }
-
-  // Redirect authenticated users from root to default protected page
-  if (user && request.nextUrl.pathname === "/") {
-    const targetPage = process.env.DEFAULT_PROTECTED_PAGE ?? DEFAULT_PROTECTED_PAGE_FALLBACK;
-    // Guard against redirect loop if misconfigured to "/"
-    if (targetPage !== "/") {
-      const url = request.nextUrl.clone();
-      url.pathname = targetPage;
-      return NextResponse.redirect(url);
-    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
