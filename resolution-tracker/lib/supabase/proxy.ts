@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { hasEnvVars } from "../utils";
+import { DEFAULT_PROTECTED_PAGE_FALLBACK, hasEnvVars } from "../utils";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -52,6 +52,17 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);
+  }
+
+  // Redirect authenticated users from root to default protected page
+  if (user && request.nextUrl.pathname === "/") {
+    const targetPage = process.env.DEFAULT_PROTECTED_PAGE ?? DEFAULT_PROTECTED_PAGE_FALLBACK;
+    // Guard against redirect loop if misconfigured to "/"
+    if (targetPage !== "/") {
+      const url = request.nextUrl.clone();
+      url.pathname = targetPage;
+      return NextResponse.redirect(url);
+    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { DEFAULT_PROTECTED_PAGE_FALLBACK, isValidRedirectPath } from "@/lib/utils";
 import { db } from "@/src/db";
 import { profiles } from "@/src/db/schema";
 import { type EmailOtpType } from "@supabase/supabase-js";
@@ -10,7 +11,11 @@ export async function GET(request: NextRequest) {
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/protected";
+
+  // Get redirect target with validation to prevent open redirect attacks
+  const nextParam = searchParams.get("next");
+  const defaultPage = process.env.DEFAULT_PROTECTED_PAGE ?? DEFAULT_PROTECTED_PAGE_FALLBACK;
+  const next = nextParam && isValidRedirectPath(nextParam) ? nextParam : defaultPage;
 
   const supabase = await createClient();
 
