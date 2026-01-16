@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resolution Tracker - Terminal UI Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --terminal-bg: #0a0a0a;
+      --terminal-bg-light: #141414;
+      --terminal-amber: #ffb000;
+      --terminal-amber-bright: #ffc940;
+      --terminal-amber-dim: #b37a00;
+      --terminal-border: #2a2a2a;
+      --terminal-glow: rgba(255, 176, 0, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      background: #000;
+    }
+
+    body {
+      font-family: 'IBM Plex Mono', 'Fira Code', 'Courier New', monospace;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--terminal-amber);
+      background: var(--terminal-bg);
+    }
+
+    /* Terminal Container */
+    .terminal {
+      max-width: 800px;
+      min-height: 100dvh;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      background: var(--terminal-bg);
+      position: relative;
+    }
+
+    /* Optional CRT Effects */
+    .terminal::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15),
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0.3;
+    }
+
+    /* Vignette effect */
+    .terminal::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(
+        ellipse at center,
+        transparent 0%,
+        transparent 60%,
+        rgba(0, 0, 0, 0.4) 100%
+      );
+      pointer-events: none;
+      z-index: 11;
+    }
+
+    /* Title Bar */
+    .terminal-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--terminal-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--terminal-bg-light);
+    }
+
+    .terminal-title {
+      color: var(--terminal-amber-bright);
+      font-weight: 500;
+      text-shadow: 0 0 8px var(--terminal-glow);
+    }
+
+    .terminal-buttons {
+      display: flex;
+      gap: 8px;
+      color: var(--terminal-amber-dim);
+    }
+
+    .terminal-buttons span {
+      cursor: pointer;
+    }
+
+    .terminal-buttons span:hover {
+      color: var(--terminal-amber);
+    }
+
+    /* Output Area */
+    .terminal-output {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Message Lines */
+    .message {
+      text-shadow: 0 0 8px var(--terminal-glow);
+    }
+
+    .message-user {
+      color: var(--terminal-amber);
+    }
+
+    .message-user .prompt {
+      color: var(--terminal-amber-dim);
+    }
+
+    .message-ai {
+      color: var(--terminal-amber);
+    }
+
+    .message-ai .prefix {
+      color: var(--terminal-amber-bright);
+      font-weight: 500;
+    }
+
+    .message-system {
+      color: var(--terminal-amber-dim);
+    }
+
+    .message-system .prefix {
+      color: var(--terminal-amber-dim);
+    }
+
+    /* Streaming cursor */
+    .cursor {
+      display: inline-block;
+      width: 0.6em;
+      height: 1.1em;
+      background: var(--terminal-amber);
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    /* Input Area */
+    .terminal-input-area {
+      padding: 16px;
+      background: var(--terminal-bg-light);
+      border-top: 1px solid var(--terminal-border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .input-prompt {
+      color: var(--terminal-amber-dim);
+      text-shadow: 0 0 8px var(--terminal-glow);
+      flex-shrink: 0;
+    }
+
+    .terminal-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--terminal-amber);
+      font-family: inherit;
+      font-size: inherit;
+      line-height: inherit;
+      text-shadow: 0 0 8px var(--terminal-glow);
+      caret-color: var(--terminal-amber);
+    }
+
+    .terminal-input::placeholder {
+      color: var(--terminal-amber-dim);
+      opacity: 0.5;
+    }
+
+    .send-button {
+      background: transparent;
+      border: 1px solid var(--terminal-amber-dim);
+      color: var(--terminal-amber-dim);
+      padding: 8px 16px;
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .send-button:hover {
+      border-color: var(--terminal-amber);
+      color: var(--terminal-amber);
+      text-shadow: 0 0 8px var(--terminal-glow);
+    }
+
+    /* ASCII Box for commands */
+    .ascii-box {
+      border: 1px solid var(--terminal-amber-dim);
+      padding: 12px 16px;
+      margin: 8px 0;
+    }
+
+    .ascii-box-title {
+      color: var(--terminal-amber-bright);
+      margin-bottom: 8px;
+      text-shadow: 0 0 8px var(--terminal-glow);
+    }
+
+    .ascii-box-content {
+      color: var(--terminal-amber);
+    }
+
+    .ascii-box-content .command {
+      color: var(--terminal-amber-bright);
+    }
+
+    .ascii-box-content .description {
+      color: var(--terminal-amber-dim);
+    }
+
+    /* Goals list */
+    .goals-list {
+      margin: 8px 0;
+    }
+
+    .goal-item {
+      display: flex;
+      gap: 8px;
+      margin: 4px 0;
+    }
+
+    .goal-status {
+      color: var(--terminal-amber-dim);
+    }
+
+    .goal-status.done {
+      color: var(--terminal-amber-bright);
+    }
+
+    .goal-text.done {
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+
+    /* Divider */
+    .divider {
+      color: var(--terminal-amber-dim);
+      margin: 8px 0;
+    }
+
+    /* Welcome screen variant */
+    .welcome-title {
+      font-size: 20px;
+      color: var(--terminal-amber-bright);
+      text-shadow: 0 0 12px var(--terminal-glow);
+      margin-bottom: 8px;
+    }
+
+    .welcome-subtitle {
+      color: var(--terminal-amber-dim);
+      margin-bottom: 24px;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .terminal {
+        max-width: 100%;
+      }
+
+      .terminal-output {
+        padding: 12px;
+      }
+
+      .terminal-input-area {
+        padding: 12px;
+      }
+    }
+
+    /* Desktop enhancement */
+    @media (min-width: 1024px) {
+      body {
+        padding: 24px;
+      }
+
+      .terminal {
+        border: 1px solid var(--terminal-border);
+        min-height: calc(100dvh - 48px);
+      }
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .cursor {
+        animation: none;
+        opacity: 1;
+      }
+
+      .terminal::before {
+        display: none;
+      }
+    }
+
+    /* View toggle buttons */
+    .view-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      display: flex;
+      gap: 8px;
+      z-index: 100;
+    }
+
+    .view-toggle button {
+      background: var(--terminal-bg-light);
+      border: 1px solid var(--terminal-border);
+      color: var(--terminal-amber-dim);
+      padding: 8px 12px;
+      font-family: inherit;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .view-toggle button:hover,
+    .view-toggle button.active {
+      border-color: var(--terminal-amber);
+      color: var(--terminal-amber);
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: flex;
+      flex-direction: column;
+    }
+  </style>
+</head>
+<body>
+  <!-- View Toggle -->
+  <div class="view-toggle">
+    <button class="active" onclick="showView('chat')">Chat</button>
+    <button onclick="showView('welcome')">Welcome</button>
+    <button onclick="showView('goals')">Goals</button>
+    <button onclick="showView('help')">Help</button>
+  </div>
+
+  <!-- Chat View (Default) -->
+  <div class="terminal view active" id="view-chat">
+    <div class="terminal-header">
+      <span class="terminal-title">RESOLUTION TRACKER v1.0</span>
+      <div class="terminal-buttons">
+        <span>[—]</span>
+        <span>[□]</span>
+        <span>[×]</span>
+      </div>
+    </div>
+
+    <div class="terminal-output">
+      <div class="message message-ai">
+        <span class="prefix">COACH:</span> Good to see you. How's it going today?
+      </div>
+
+      <div class="message message-user">
+        <span class="prompt">&gt;</span> skipped the gym again, work was insane
+      </div>
+
+      <div class="message message-ai">
+        <span class="prefix">COACH:</span> Tuesdays have been rough lately. Work still chaotic? Remember — even 10 minutes counts. What's one small thing you could do tonight?
+      </div>
+
+      <div class="message message-user">
+        <span class="prompt">&gt;</span> maybe just some stretching before bed
+      </div>
+
+      <div class="message message-ai">
+        <span class="prefix">COACH:</span> That's the move. Stretching is underrated — good for the body, good for winding down. Let me know how it goes tomorrow.
+      </div>
+
+      <div class="message message-user">
+        <span class="prompt">&gt;</span> will do, thanks
+      </div>
+
+      <div class="message message-ai">
+        <span class="prefix">COACH:</span> Anytime. Rest well.<span class="cursor"></span>
+      </div>
+    </div>
+
+    <div class="terminal-input-area">
+      <span class="input-prompt">&gt;</span>
+      <input type="text" class="terminal-input" placeholder="Type a message..." autofocus>
+      <button class="send-button">SEND</button>
+    </div>
+  </div>
+
+  <!-- Welcome View -->
+  <div class="terminal view" id="view-welcome">
+    <div class="terminal-header">
+      <span class="terminal-title">RESOLUTION TRACKER v1.0</span>
+      <div class="terminal-buttons">
+        <span>[—]</span>
+        <span>[□]</span>
+        <span>[×]</span>
+      </div>
+    </div>
+
+    <div class="terminal-output" style="justify-content: center; align-items: center; text-align: center;">
+      <div>
+        <div class="welcome-title">RESOLUTION TRACKER</div>
+        <div class="welcome-subtitle">Your AI coach for sticking with goals</div>
+
+        <div class="message message-ai" style="text-align: left; max-width: 500px;">
+          <span class="prefix">COACH:</span> Hey! I'm your resolution coach. I'll help you stay on track with your goals — no guilt, no streaks, just honest support.
+          <br><br>
+          What's one goal you want to work on this year?
+        </div>
+      </div>
+    </div>
+
+    <div class="terminal-input-area">
+      <span class="input-prompt">&gt;</span>
+      <input type="text" class="terminal-input" placeholder="Type your first goal...">
+      <button class="send-button">SEND</button>
+    </div>
+  </div>
+
+  <!-- Goals View -->
+  <div class="terminal view" id="view-goals">
+    <div class="terminal-header">
+      <span class="terminal-title">RESOLUTION TRACKER v1.0</span>
+      <div class="terminal-buttons">
+        <span>[—]</span>
+        <span>[□]</span>
+        <span>[×]</span>
+      </div>
+    </div>
+
+    <div class="terminal-output">
+      <div class="message message-system">
+        <span class="prefix">SYSTEM:</span> Displaying goals...
+      </div>
+
+      <div>
+        <div class="divider">YOUR GOALS</div>
+        <div class="divider">──────────────────────────────────────</div>
+
+        <div class="goals-list">
+          <div class="goal-item">
+            <span class="goal-status">[active]</span>
+            <span class="goal-text">Hit the gym 3x per week</span>
+          </div>
+          <div class="goal-item">
+            <span class="goal-status">[active]</span>
+            <span class="goal-text">Learn Spanish (15 min daily)</span>
+          </div>
+          <div class="goal-item">
+            <span class="goal-status">[active]</span>
+            <span class="goal-text">Read before bed instead of scrolling</span>
+          </div>
+          <div class="goal-item">
+            <span class="goal-status done">[done]</span>
+            <span class="goal-text done">Complete Q1 project proposal ✓</span>
+          </div>
+        </div>
+
+        <div class="divider" style="margin-top: 16px;">──────────────────────────────────────</div>
+        <div style="color: var(--terminal-amber-dim); margin-top: 8px;">
+          Type anything to return to conversation.
+        </div>
+      </div>
+    </div>
+
+    <div class="terminal-input-area">
+      <span class="input-prompt">&gt;</span>
+      <input type="text" class="terminal-input" placeholder="Type to continue...">
+      <button class="send-button">SEND</button>
+    </div>
+  </div>
+
+  <!-- Help View -->
+  <div class="terminal view" id="view-help">
+    <div class="terminal-header">
+      <span class="terminal-title">RESOLUTION TRACKER v1.0</span>
+      <div class="terminal-buttons">
+        <span>[—]</span>
+        <span>[□]</span>
+        <span>[×]</span>
+      </div>
+    </div>
+
+    <div class="terminal-output">
+      <div class="message message-system">
+        <span class="prefix">SYSTEM:</span> Help requested.
+      </div>
+
+      <div class="ascii-box">
+        <div class="ascii-box-title">AVAILABLE COMMANDS</div>
+        <div class="ascii-box-content">
+          <div style="margin: 4px 0;">
+            <span class="command">/goals</span>
+            <span class="description"> — View your current goals</span>
+          </div>
+          <div style="margin: 4px 0;">
+            <span class="command">/settings</span>
+            <span class="description"> — Manage integrations & preferences</span>
+          </div>
+          <div style="margin: 4px 0;">
+            <span class="command">/help</span>
+            <span class="description"> — Show this help message</span>
+          </div>
+          <div style="margin: 4px 0;">
+            <span class="command">/clear</span>
+            <span class="description"> — Clear conversation history</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ascii-box">
+        <div class="ascii-box-title">KEYBOARD SHORTCUTS</div>
+        <div class="ascii-box-content">
+          <div style="margin: 4px 0;">
+            <span class="command">Enter</span>
+            <span class="description"> — Send message</span>
+          </div>
+          <div style="margin: 4px 0;">
+            <span class="command">↑ / ↓</span>
+            <span class="description"> — Browse message history</span>
+          </div>
+          <div style="margin: 4px 0;">
+            <span class="command">Escape</span>
+            <span class="description"> — Clear current input</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="color: var(--terminal-amber-dim); margin-top: 16px;">
+        Type anything to return to conversation.
+      </div>
+    </div>
+
+    <div class="terminal-input-area">
+      <span class="input-prompt">&gt;</span>
+      <input type="text" class="terminal-input" placeholder="Type to continue...">
+      <button class="send-button">SEND</button>
+    </div>
+  </div>
+
+  <script>
+    function showView(viewName) {
+      // Hide all views
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
+
+      // Show selected view
+      document.getElementById('view-' + viewName).classList.add('active');
+      event.target.classList.add('active');
+
+      // Focus input
+      const input = document.querySelector('.view.active .terminal-input');
+      if (input) input.focus();
+    }
+
+    // Handle Enter key to "send" messages
+    document.querySelectorAll('.terminal-input').forEach(input => {
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && input.value.trim()) {
+          // In a real app, this would send the message
+          // For the mockup, just clear the input
+          console.log('Message sent:', input.value);
+          input.value = '';
+        }
+        if (e.key === 'Escape') {
+          input.value = '';
+        }
+      });
+    });
+
+    // Handle send button click
+    document.querySelectorAll('.send-button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const input = btn.parentElement.querySelector('.terminal-input');
+        if (input.value.trim()) {
+          console.log('Message sent:', input.value);
+          input.value = '';
+          input.focus();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

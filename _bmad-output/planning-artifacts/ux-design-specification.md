@@ -1,11 +1,12 @@
 ---
 stepsCompleted: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
-status: complete
+status: revised
+revision: 2.0 - Terminal Aesthetic
 inputDocuments:
   - product-brief-week1-2026-01-08.md
   - prd.md
   - project-context.md
-date: 2026-01-13
+date: 2026-01-16
 author: Justin
 project: Resolution Tracker
 ---
@@ -13,7 +14,8 @@ project: Resolution Tracker
 # UX Design Specification: Resolution Tracker
 
 **Author:** Justin
-**Date:** 2026-01-13
+**Date:** 2026-01-16
+**Revision:** 2.0 - Retro Terminal Aesthetic
 
 ---
 
@@ -23,7 +25,9 @@ project: Resolution Tracker
 
 Resolution Tracker is a conversational AI coach that helps users stick with their yearly goals by maintaining context, memory, and a warm relationship — solving the "February problem" where motivation fades and traditional apps fail.
 
-The core UX philosophy: **conversation is the product**. Unlike checkbox-driven goal trackers that feel like chores, Resolution Tracker feels like texting a supportive friend who actually remembers your story. No guilt mechanics, no streaks, no passive-aggressive notifications — just a warm presence that meets users where they are.
+The core UX philosophy: **the terminal is the interface**. Unlike bloated productivity apps with endless chrome and distractions, Resolution Tracker embraces the retro terminal aesthetic — amber phosphor text on dark screens, ASCII art, monospace typography, and the honest simplicity of a command line. This isn't nostalgia for its own sake; it's a deliberate rejection of manipulative UI patterns. The terminal aesthetic signals: *no tricks, no dark patterns, just you and a supportive AI having a conversation.*
+
+The warmth comes from the words, not the pixels. The AI coach speaks with care while the interface stays out of the way — like a wise mentor who happens to communicate through a vintage terminal.
 
 ### Target Users
 
@@ -32,46 +36,46 @@ The core UX philosophy: **conversation is the product**. Unlike checkbox-driven 
 - 2-4 personal goals that matter deeply but slip through the cracks
 - Mentally exhausted by end of day — needs low-friction, not more work
 - Seeks accountability that feels supportive, not surveillance
-- Tech-savvy but values simplicity over power-user features
+- Tech-savvy and appreciates the terminal aesthetic as authentic, not gimmicky
 
 **Usage Context:**
-- Mobile-first (responsive web, not native)
+- Responsive web (works identically on mobile and desktop)
 - Quick check-ins throughout the day or evening wind-down
 - Conversational interactions under 60 seconds
-- Occasional desktop use for integrations setup
+- Terminal aesthetic works naturally across all screen sizes
 
 ### Key Design Challenges
 
 | Challenge | Implication |
 |-----------|-------------|
-| **Conversation as Interface** | Chat must feel like texting a friend, not talking to a bot. UI should disappear — conversation is the star. |
-| **Progress Without Guilt** | No streaks, percentages, or red/green shame indicators. Show progress in a way that encourages, not judges. |
-| **The Warm Return** | When users come back after days/weeks away, the experience must feel like a welcome, not disappointment. Critical to retention. |
-| **Mobile-First Constraints** | Touch-friendly, thumb-zone aware, fast-loading. Every interaction optimized for one-handed phone use. |
+| **Conversation as Interface** | Chat must feel like typing commands to a trusted system. The terminal aesthetic reinforces focus — no distractions, just dialogue. |
+| **Progress Without Guilt** | No streaks, percentages, or color-coded shame. The terminal doesn't judge — it just responds. |
+| **The Warm Return** | When users come back after days/weeks away, the terminal greets them simply. No guilt-inducing splash screens or "you've been gone X days" messages. |
+| **Terminal Readability** | Amber-on-dark must be comfortable for extended reading. Proper contrast, generous line-height, appropriate font sizing. |
 
 ### Design Opportunities
 
 | Opportunity | Approach |
 |-------------|----------|
-| **Chat-First Architecture** | Conversation is the primary interface. Dashboard, goals, settings are all secondary. Rare and differentiated. |
-| **Emotional Design Language** | Warm colors, soft shapes, friendly typography. Visual design that matches the AI's supportive tone. |
-| **"Better Than Nothing" Philosophy** | When goals feel big, surface micro-actions. Make small feel celebrated, not insufficient. |
-| **Anti-Gamification Stance** | No streaks, badges, or leaderboards. Progress shown through narrative and reflection, not metrics. |
+| **Terminal-First Architecture** | The command prompt is home. Everything flows through text. Goals, settings, and history are accessible but secondary. |
+| **Retro Aesthetic, Modern Soul** | Amber phosphor visuals with cutting-edge AI underneath. The contrast is intentional — vintage interface, bleeding-edge intelligence. |
+| **"Better Than Nothing" Philosophy** | The AI suggests micro-actions in plain text. No animated celebrations — just honest acknowledgment. |
+| **Anti-Gamification Stance** | The terminal has no room for badges or streaks. Progress is tracked through conversation history, not metrics dashboards. |
 
 ## Core User Experience
 
 ### Defining Experience
 
-The core experience is a **conversational check-in loop**:
+The core experience is a **terminal session**:
 
-1. User opens app → lands directly in chat (no intermediary screens)
-2. User types a short message ("gym today" / "skipped, work chaos")
+1. User opens app → lands at the command prompt (no intermediary screens)
+2. User types a message at the `>` prompt ("gym today" / "skipped, work chaos")
 3. AI responds with streaming text — contextual, warm, remembers history
-4. Conversation continues or user closes app
+4. Conversation continues or user closes the terminal
 
-This is a **messaging app**, not a productivity app. The mental model is iMessage or WhatsApp, not Todoist or Notion. Users should feel like they're texting a friend who happens to have perfect memory.
+This is a **terminal emulator**, not a messaging app. The mental model is a command line interface — direct, honest, no-nonsense. Users should feel like they're interacting with a wise system that speaks plainly and remembers everything.
 
-**The Core Action:** Sending a quick check-in message and receiving a contextual response.
+**The Core Action:** Typing a check-in at the prompt and receiving a contextual response.
 
 **Time to Value:** Under 10 seconds from app open to message sent.
 
@@ -79,28 +83,28 @@ This is a **messaging app**, not a productivity app. The mental model is iMessag
 
 | Aspect | Decision |
 |--------|----------|
-| **Primary Platform** | Mobile web (responsive) |
-| **Secondary Platform** | Desktop web (same app, responsive) |
+| **Primary Platform** | Responsive web (terminal works everywhere) |
+| **Secondary Platform** | N/A — same experience on all devices |
 | **Native Apps** | Out of scope for MVP |
-| **Interaction Model** | Touch-first, thumb-zone optimized |
+| **Interaction Model** | Keyboard-first, touch-compatible |
 | **Offline Support** | Not required for MVP (always-connected assumed) |
 
-**Mobile-First Implications:**
-- Large touch targets for message input
-- Keyboard appears immediately on chat focus
-- Minimal chrome — conversation fills the screen
-- Bottom-anchored input (thumb-friendly)
+**Terminal-First Implications:**
+- Fixed-width container that looks intentional on any screen size
+- Input always visible at bottom of terminal window
+- Monospace font ensures consistent character alignment
+- No complex responsive breakpoints needed — terminal is terminal
 - Fast initial load (<2s on 3G)
 
 ### Effortless Interactions
 
-| Interaction | Effortless Design |
-|-------------|-------------------|
-| **Opening the app** | Direct to chat. No splash, no dashboard, no friction. |
-| **Sending a check-in** | Single text input, send on enter/tap. No forms, categories, or dropdowns. |
-| **Reading AI response** | Streaming text appears immediately. No loading spinners, no waiting. |
-| **Returning after absence** | No guilt UI. AI greets warmly. History preserved but not highlighted. |
-| **Viewing goals** | Accessible but not prominent. Swipe or tap to see, conversation stays primary. |
+| Interaction | Terminal Design |
+|-------------|-----------------|
+| **Opening the app** | Direct to terminal prompt. Cursor blinking, ready for input. |
+| **Sending a check-in** | Type at `>` prompt, press Enter. No buttons required (though tap-to-send available). |
+| **Reading AI response** | `COACH:` prefix, streaming text character-by-character. Authentic terminal feel. |
+| **Returning after absence** | Terminal simply shows the prompt. AI greets naturally in first response. No splash screens. |
+| **Viewing goals** | Type `/goals` command or access via simple menu. Text-based list, no cards. |
 
 ### Critical Success Moments
 
@@ -109,45 +113,45 @@ This is a **messaging app**, not a productivity app. The mental model is iMessag
 | **First AI response with context** | "Wait, it remembers I mentioned Tuesdays are hard?" — This is the aha moment. |
 | **The warm return** | After 17 silent days, the AI says "Good to see you" — not "You've been gone 17 days." |
 | **The micro-suggestion** | "Couldn't make the gym? How about 20 pushups?" — Turns failure into action. |
-| **The quick check-in** | User sends message, gets response, closes app in under 30 seconds. Felt supported, not burdened. |
+| **The quick check-in** | User types, gets response, closes terminal in under 30 seconds. Felt supported, not burdened. |
 
 ### Experience Principles
 
-1. **Conversation is the product.** Everything else (dashboard, goals, settings) is secondary. The chat is home.
+1. **The terminal is the product.** Everything flows through text. The prompt is home.
 
-2. **Disappearing UI.** The interface should feel invisible. No chrome competing with the conversation.
+2. **Honest interface.** The terminal aesthetic signals authenticity — no tricks, no manipulative UI patterns, just conversation.
 
-3. **Instant and streaming.** Responses appear immediately, character by character. No spinners, no "AI is thinking..." delays.
+3. **Instant and streaming.** Responses appear immediately, character by character. Like watching output scroll in a real terminal.
 
 4. **Memory without surveillance.** The AI remembers everything but never weaponizes it. Context creates connection, not guilt.
 
-5. **Small is celebrated.** 20 pushups is a win. One Spanish flashcard is progress. The UX never makes "better than nothing" feel insufficient.
+5. **Small is celebrated.** 20 pushups is a win. One Spanish flashcard is progress. The terminal acknowledges honestly, without fanfare.
 
 ## Desired Emotional Response
 
 ### Primary Emotional Goals
 
-**Core Feeling: "Someone's got my back."**
+**Core Feeling: "A system I can trust."**
 
-Resolution Tracker should feel like a supportive friend who:
+Resolution Tracker should feel like a wise terminal that:
 - Remembers your story without judging it
-- Celebrates small wins without making you feel like you need big ones
+- Acknowledges small wins without performative celebration
 - Welcomes you back without mentioning how long you've been gone
-- Believes in you even when you don't
+- Speaks plainly and honestly, always on your side
 
-This is not a coach, not a parent, not a gamified system. It's a presence — warm, consistent, and on your side.
+The terminal aesthetic reinforces trust. There's nowhere for manipulation to hide in a command line. What you type is what you send. What you read is what the AI thinks. No dark patterns, no guilt mechanics — just honest text on a screen.
 
 ### Emotional Journey Map
 
-| Stage | User State | Desired Emotion | Design Implication |
-|-------|------------|-----------------|-------------------|
-| **First open** | Curious, maybe skeptical | Ease, simplicity | No onboarding walls, straight to conversation |
-| **Typing check-in** | Tired, maybe rushed | Lightness, low effort | Single input, no forms, send instantly |
-| **Reading AI response** | Waiting, hopeful | Surprise, warmth | Streaming text, contextual memory, personal tone |
-| **After a win** | Accomplished | Quiet pride | Warm acknowledgment, not fireworks |
-| **After a miss** | Guilty, deflated | Acceptance, redirect | "Better than nothing" micro-suggestion |
-| **Returning after absence** | Shame, hesitation | Relief, welcome | No guilt UI, warm re-entry, fresh start option |
-| **Completing a goal** | Proud, reflective | Quiet celebration | Simple, genuine — "You did it. Proud of you." |
+| Stage | User State | Desired Emotion | Terminal Expression |
+|-------|------------|-----------------|---------------------|
+| **First open** | Curious, maybe skeptical | Ease, intrigue | Blinking cursor, ready. No onboarding walls. |
+| **Typing check-in** | Tired, maybe rushed | Lightness, low effort | Simple `>` prompt. Type and press Enter. |
+| **Reading AI response** | Waiting, hopeful | Surprise, warmth | `COACH:` streaming text, contextual memory |
+| **After a win** | Accomplished | Quiet pride | Plain text acknowledgment. "Nice work." |
+| **After a miss** | Guilty, deflated | Acceptance, redirect | "That's okay. What's one small thing you could do?" |
+| **Returning after absence** | Shame, hesitation | Relief, welcome | Just the prompt. AI greets warmly in text. |
+| **Completing a goal** | Proud, reflective | Quiet celebration | "You did it. Proud of you." — plain text, genuine. |
 
 ### Micro-Emotions
 
@@ -155,30 +159,30 @@ This is not a coach, not a parent, not a gamified system. It's a presence — wa
 
 | Emotion | Why It Matters |
 |---------|----------------|
-| **Trust** | User believes the AI genuinely cares, isn't manipulating them |
-| **Confidence** | User always knows what to do next, no confusion |
-| **Accomplishment** | Small actions feel meaningful, not insufficient |
-| **Belonging** | Someone's in their corner, they're not alone |
-| **Safety** | Can be honest about failures without judgment |
+| **Trust** | The terminal aesthetic signals honesty — no tricks, no manipulation |
+| **Confidence** | Clear prompt, clear responses. User always knows what to do. |
+| **Accomplishment** | Small actions acknowledged plainly. No "gamification theater." |
+| **Belonging** | The AI speaks like a trusted ally. You're not alone. |
+| **Safety** | Can be honest about failures. The terminal doesn't judge. |
 
 **Emotions to prevent:**
 
 | Emotion | How We Prevent It |
 |---------|-------------------|
-| **Guilt** | No streaks, no "missed days" counters, no passive-aggressive copy |
-| **Anxiety** | No red indicators, no urgency, no push notifications in MVP |
-| **Overwhelm** | Minimal UI, one action at a time, goals stay backgrounded |
-| **Surveillance creep** | Memory feels supportive ("I remember you said...") not creepy ("You said X on January 3rd") |
+| **Guilt** | No streaks, no counters, no passive-aggressive copy |
+| **Anxiety** | No color-coded alerts, no urgency signals, no push notifications |
+| **Overwhelm** | One prompt, one response. Terminal simplicity. |
+| **Surveillance creep** | Memory feels supportive ("You mentioned...") not creepy ("On January 3rd you said...") |
 
 ### Emotional Design Principles
 
-1. **Warmth over efficiency.** The AI can take an extra sentence to be kind. Speed isn't the only metric.
+1. **Warmth through words.** The terminal is cold; the AI is warm. Contrast is intentional.
 
-2. **Acknowledgment over celebration.** A goal completed gets "You did it. Proud of you." — not confetti and fireworks.
+2. **Acknowledgment over celebration.** A goal completed gets "You did it. Proud of you." — plain text, not ASCII fireworks.
 
-3. **Acceptance over accountability.** When users fail, meet them where they are. Don't remind them of the gap.
+3. **Acceptance over accountability.** When users fail, meet them where they are. The terminal doesn't lecture.
 
-4. **Presence over persuasion.** The app is always there, never pushy. No notifications begging for attention.
+4. **Presence over persuasion.** The prompt is always there, never pushy. No notifications begging for attention.
 
 5. **Memory as connection.** Remembering details creates intimacy ("You mentioned Tuesdays are hard") — never weaponize it ("You've missed 3 Tuesdays").
 
@@ -188,164 +192,169 @@ This is not a coach, not a parent, not a gamified system. It's a presence — wa
 
 | Product | What They Nail | What We Take |
 |---------|----------------|--------------|
-| **iMessage** | Zero-friction messaging. Open → type → send. Conversation fills screen, UI disappears. Input anchored at bottom for thumb reach. | The interaction model: chat-first, instant, effortless. No learning curve. |
-| **Headspace** | Warm, calm, non-judgmental tone. Soft colors, rounded shapes, gentle animations. Copy feels like a friend, not a coach. | The emotional design language: warmth, softness, quiet encouragement. |
-| **Factory.ai** | Clean minimalism with confident typography. Generous whitespace, grid-based precision. Professional without being cold. | The visual structure: whitespace, hierarchy, modern sans-serif type, layout confidence. |
+| **Cool Retro Term** | Authentic CRT terminal emulation. Amber/green phosphor options, scanlines, subtle flicker. Nostalgia that's actually usable. | The visual foundation: amber phosphor, CRT glow effects, authentic terminal feel. |
+| **Linear** | Rebuilt their theme system using LCH color space. Just 3 variables define entire themes. Dark mode that's comfortable for hours. | The technical approach: systematic color generation, perceptually uniform contrast. |
+| **Raycast** | Bold accent colors against dark backgrounds. Clean monospace elements. Feels like a power tool, not a toy. | The confidence: dark interfaces that feel professional and cutting-edge. |
 
-### Design Synthesis: "Confident Warmth"
+### Design Synthesis: "Warm Terminal"
 
 The visual direction combines:
-- **Structure from Factory.ai** — Grid precision, generous whitespace, confident typography
-- **Warmth from Headspace** — Soft colors, rounded corners, gentle micro-interactions
-- **Interaction from iMessage** — Chat-first, bottom-anchored input, streaming responses
+- **Authenticity from Cool Retro Term** — Amber phosphor, CRT effects, monospace typography
+- **System from Linear** — Computed colors from minimal variables, consistent contrast
+- **Confidence from Raycast** — Dark background, bold accents, power-user aesthetic
 
-**The result:** A meditation app designed by a premium tech studio. Minimal but not cold. Confident but not intimidating. Warm but not childish.
+**The result:** A vintage terminal running a cutting-edge AI. The interface says "built by someone who knows what they're doing." The AI says "I'm here to help." Contrast creates character.
 
 ### Transferable UX Patterns
 
 **Navigation Patterns:**
 | Pattern | Source | Application |
 |---------|--------|-------------|
-| Chat as home screen | iMessage | User lands directly in conversation, no intermediary |
-| Minimal chrome | Factory.ai | Header/nav nearly invisible, content is king |
-| Bottom-anchored input | iMessage | Thumb-friendly, always accessible on mobile |
+| Prompt as home | Unix terminals | User lands at `>` prompt, cursor blinking |
+| Command-based navigation | CLI conventions | `/goals`, `/settings`, `/help` commands available |
+| Minimal chrome | Terminal emulators | Window frame optional, content is everything |
 
 **Interaction Patterns:**
 | Pattern | Source | Application |
 |---------|--------|-------------|
-| Streaming text | iMessage/ChatGPT | AI response appears character-by-character |
-| Tap to send | iMessage | Single action, no confirmation dialogs |
-| Pull to refresh (optional) | iOS conventions | Natural gesture for checking updates |
+| Streaming text | Terminal output | AI response streams character-by-character |
+| Enter to submit | CLI conventions | Type and press Enter, no button needed |
+| Command history | Shell conventions | Up arrow recalls previous messages |
 
 **Visual Patterns:**
 | Pattern | Source | Application |
 |---------|--------|-------------|
-| Generous whitespace | Factory.ai | Let the conversation breathe |
-| Soft rounded corners | Headspace | Friendly, approachable containers |
-| Warm neutral palette | Headspace | Light backgrounds, warm grays, gentle accents |
+| Monospace typography | All terminals | Consistent character width, authentic feel |
+| Phosphor glow | CRT monitors | Text-shadow creates warm glow effect |
+| Scanlines (subtle) | Vintage CRTs | Optional effect for extra authenticity |
+| Box-drawing characters | ASCII art | `╔═══╗` borders for structure |
 
 ### Anti-Patterns to Avoid
 
 | Anti-Pattern | Why It Fails | Our Alternative |
 |--------------|--------------|-----------------|
 | **Streak counters** | Creates guilt, triggers shame spirals | No visible counters or "days since" |
-| **Red/green indicators** | Judgmental, anxiety-inducing | Neutral colors, no pass/fail visual language |
-| **Onboarding carousels** | Delays value, users skip anyway | Straight to conversation, learn by doing |
+| **Color-coded status** | Judgmental, anxiety-inducing | Amber only, no red/green |
+| **Onboarding wizards** | Delays value, breaks terminal metaphor | Straight to prompt, learn by typing |
 | **Notification badges** | Nagging, creates obligation | No badges, no guilt mechanics |
-| **Complex dashboards** | Overwhelming, splits attention | Minimal dashboard, conversation is primary |
-| **Gamification elements** | Manipulative, short-term motivation | Intrinsic motivation through relationship |
+| **Complex dashboards** | Overwhelming, breaks terminal simplicity | Everything through text commands |
+| **Gamification elements** | Manipulative, antithetical to terminal honesty | Intrinsic motivation through conversation |
 
 ### Design Inspiration Strategy
 
 **Adopt directly:**
-- Chat-first architecture (iMessage)
-- Bottom-anchored text input (iMessage)
-- Streaming AI responses (modern convention)
-- Generous whitespace and grid structure (Factory.ai)
+- Terminal-first architecture (command prompt is home)
+- Monospace typography throughout
+- Streaming text output (character-by-character)
+- Amber phosphor color palette
+- Dark background with light text
 
 **Adapt for our context:**
-- Headspace's warm palette → lighter, more neutral (less blue/purple, more warm white/cream)
-- Factory.ai's dark confidence → translate to light mode with warm accents
-- Rounded corners everywhere → but not overly bubbly, keep it refined
+- CRT scanlines → very subtle, optional (don't sacrifice readability)
+- Box-drawing characters → use for structure, not decoration
+- Command syntax → simplified (plain text works, commands optional)
+- Flicker effects → skip entirely (accessibility concern)
 
 **Explicitly avoid:**
 - Any gamification (streaks, badges, leaderboards)
-- Red/green success/failure indicators
-- Notification-heavy patterns
+- Multiple colors for status indication
+- Heavy visual effects that harm readability
 - Complex multi-screen flows
-- Cold, sterile "productivity app" aesthetics
+- Overly literal "hacker movie" aesthetics (no Matrix rain)
 
 ## Design System Foundation
 
 ### Design System Choice
 
-**Primary:** Tailwind CSS + shadcn/ui
+**Primary:** Tailwind CSS + Custom Terminal Components
 
-A component library built specifically for the Next.js + Tailwind stack. Components are copy-pasted into the codebase (not npm dependencies), giving full control over customization while maintaining accessibility standards via Radix UI primitives.
+For the retro terminal aesthetic, we'll use Tailwind CSS for utility classes but build custom terminal-specific components rather than relying heavily on shadcn/ui. The terminal look requires specific styling that's better achieved through purpose-built components.
 
 ### Rationale for Selection
 
 | Factor | Decision Driver |
 |--------|-----------------|
-| **Stack alignment** | Built for Next.js + Tailwind — zero friction with existing architecture |
-| **Customization control** | Components live in codebase, can modify every detail for "confident warmth" |
-| **Accessibility** | Radix UI primitives handle keyboard nav, screen readers, focus management |
-| **Mobile-first ready** | Responsive defaults, touch-friendly sizing out of the box |
-| **Developer experience** | Solo developer can move fast without sacrificing quality |
-| **No vendor lock-in** | Own the code, no breaking changes from upstream updates |
+| **Stack alignment** | Tailwind works perfectly with Next.js — zero friction |
+| **Terminal specificity** | Custom components ensure authentic terminal feel |
+| **Accessibility** | Custom focus states, keyboard navigation, screen reader support |
+| **Simplicity** | Terminal UI is inherently simple — fewer components needed |
+| **Developer experience** | Monospace + dark theme = consistent, predictable styling |
+| **Performance** | Minimal CSS, no heavy component libraries |
 
 ### Implementation Approach
 
 **Phase 1: Foundation Setup**
-- Install shadcn/ui CLI and initialize with project
-- Configure Tailwind with custom warm color palette
-- Set up CSS variables for consistent theming
+- Configure Tailwind with amber phosphor color palette
+- Set up CSS custom properties for terminal theming
+- Add CRT effect utilities (glow, scanlines as optional)
 
-**Phase 2: Component Customization**
-- Warm up default components (colors, radii, shadows)
-- Create chat-specific components (message bubbles, input bar)
-- Build minimal navigation components
+**Phase 2: Terminal Components**
+- Build TerminalWindow container with optional frame
+- Create TerminalInput with blinking cursor
+- Build TerminalOutput for streaming text display
+- Add ASCII box-drawing utilities
 
-**Phase 3: Design Tokens**
-- Establish spacing scale (generous, breathing room)
-- Define typography scale (mobile-first, readable)
-- Lock in color palette as reusable tokens
+**Phase 3: Effects Layer**
+- Implement text-shadow glow effect
+- Add optional scanline overlay
+- Create cursor blink animation
 
 ### Customization Strategy
 
-**Color Palette — "Confident Warmth"**
+**Color Palette — "Amber Phosphor"**
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--background` | Warm off-white (#FEFDFB or similar) | Page backgrounds |
-| `--foreground` | Warm charcoal (#2D2A26) | Primary text |
-| `--muted` | Warm gray (#F5F3F0) | Secondary backgrounds, borders |
-| `--accent` | Soft amber (#F5A623 / amber-400 range) | Interactive elements, highlights |
-| `--accent-soft` | Pale amber (#FEF3E2) | Hover states, subtle highlights |
+| `--terminal-bg` | `#0a0a0a` | Terminal background (near-black) |
+| `--terminal-bg-secondary` | `#141414` | Elevated surfaces, input areas |
+| `--terminal-amber` | `#ffb000` | Primary text (P3 amber phosphor) |
+| `--terminal-amber-dim` | `#b37a00` | Secondary text, timestamps |
+| `--terminal-amber-glow` | `rgba(255, 176, 0, 0.4)` | Text-shadow glow effect |
+| `--terminal-border` | `#2a2a2a` | Subtle borders, dividers |
 
-**Border Radius — Friendly, Not Childish**
+**Border Radius — Sharp Corners**
 
 | Element | Radius |
 |---------|--------|
-| Buttons | `rounded-xl` (12px) |
-| Cards/Containers | `rounded-2xl` (16px) |
-| Message bubbles | `rounded-2xl` with tail |
-| Input fields | `rounded-xl` (12px) |
+| Terminal window | `rounded-none` or `rounded-sm` (2px) |
+| Input fields | `rounded-none` |
+| Buttons | `rounded-none` |
+| Everything | Sharp corners reinforce terminal aesthetic |
 
-**Shadows — Soft and Warm**
-- Avoid hard drop shadows
-- Use subtle, warm-tinted shadows (`shadow-sm` with warm gray tint)
-- Prefer elevation through background color shifts over heavy shadows
+**Shadows — Glow, Not Drop**
+- No traditional drop shadows
+- Use `text-shadow` for phosphor glow effect
+- Optional `box-shadow` glow on focused elements
+- Example: `text-shadow: 0 0 8px var(--terminal-amber-glow)`
 
 **Typography**
 
 | Role | Spec |
 |------|------|
-| Font family | Inter (default) or Plus Jakarta Sans (warmer alternative) |
-| Body size | 16px base (mobile-readable) |
-| Line height | 1.5-1.6 (generous, breathable) |
-| Headings | Semi-bold, not heavy |
+| Font family | `'IBM Plex Mono', 'Fira Code', 'Courier New', monospace` |
+| Body size | 16px base (readable on all devices) |
+| Line height | 1.6 (generous for readability) |
+| Font weight | 400 regular, 500 for emphasis |
 
 ### Component Inventory (MVP)
 
-| Component | shadcn Base | Customization Needed |
-|-----------|-------------|---------------------|
-| Button | `button` | Warm colors, softer radius |
-| Input | `input` | Larger touch target, warm focus ring |
-| Card | `card` | Warm background, softer shadow |
-| Avatar | `avatar` | For AI persona representation |
-| Skeleton | `skeleton` | Warm loading states |
-| **Custom: ChatBubble** | None | Build from scratch — user vs AI styling |
-| **Custom: ChatInput** | Based on `input` | Bottom-anchored, send button integrated |
-| **Custom: GoalCard** | Based on `card` | Minimal, warm, no progress indicators |
+| Component | Base | Notes |
+|-----------|------|-------|
+| **TerminalWindow** | Custom | Main container, optional ASCII frame |
+| **TerminalInput** | Custom | `>` prompt, blinking cursor, Enter to submit |
+| **TerminalOutput** | Custom | Streaming text with `COACH:` prefix |
+| **TerminalLine** | Custom | Single line of output (user or AI) |
+| **ASCIIBox** | Custom | Box-drawing character containers |
+| **CommandHelp** | Custom | `/help` output formatting |
+| **GoalList** | Custom | Text-based goal listing |
 
 ## Defining Experience
 
 ### The One-Line Pitch
 
-> "Tell your AI what happened, and feel understood."
+> "Type what happened. Get understood."
 
-The magic isn't the chat interface — that's just the vehicle. The magic is the *response*. The moment the AI says something that proves it knows you. That's the aha moment that creates loyalty.
+The magic isn't the terminal — that's just the vehicle. The magic is the *response*. The moment the AI says something that proves it knows you. That's the aha moment that creates loyalty. The terminal aesthetic just gets out of the way.
 
 ### User Mental Model
 
@@ -353,10 +362,10 @@ The magic isn't the chat interface — that's just the vehicle. The magic is the
 
 | Expectation | Source | Implication |
 |-------------|--------|-------------|
-| "I just type and send" | iMessage, WhatsApp | Zero learning curve, no forms |
+| "I type and press Enter" | Every terminal ever | Zero learning curve for tech-savvy users |
 | "It should remember what I told it" | Human conversation | Context must persist across sessions |
-| "It won't judge me" | Therapy/coaching model | Tone must be warm, never accusatory |
-| "Quick interactions, not journaling" | Text messaging habits | Optimize for 1-2 sentences, not paragraphs |
+| "It won't judge me" | The terminal's neutrality | Tone must be warm, interface stays neutral |
+| "Quick interactions, not journaling" | CLI efficiency | Optimize for 1-2 sentences, not paragraphs |
 
 **What users are escaping:**
 
@@ -365,7 +374,7 @@ The magic isn't the chat interface — that's just the vehicle. The magic is the
 | Habit tracker apps | Checkbox fatigue, guilt mechanics | Conversational, no pass/fail |
 | Note-taking apps | No feedback, feels like shouting into void | AI responds with understanding |
 | Accountability buddies | Requires coordination, social pressure | Always available, no judgment |
-| Journaling apps | Time-consuming, no engagement | Quick check-ins, active response |
+| Bloated productivity apps | Too many features, too much UI | Terminal simplicity, just text |
 
 ### Success Criteria
 
@@ -374,29 +383,29 @@ The magic isn't the chat interface — that's just the vehicle. The magic is the
 | Criteria | Measurement |
 |----------|-------------|
 | **Speed** | Message sent within 10 seconds of opening |
-| **Naturalness** | User types in plain language, no special syntax |
+| **Naturalness** | User types in plain language at the prompt |
 | **Recognition** | AI response references something specific from user's history |
-| **Emotional landing** | User closes app feeling lighter, not burdened |
+| **Emotional landing** | User closes terminal feeling lighter, not burdened |
 | **Return intent** | User wants to come back tomorrow |
 
 **The "tell a friend" moment:**
 
-> *"I told it I skipped the gym again, and it said 'Tuesdays have been hard for you lately — what's going on at work?' It actually remembered."*
+> *"It's like a terminal that talks back. I typed 'skipped gym again' and it said 'Tuesdays have been hard lately — what's going on at work?' It actually remembered."*
 
-This story — AI demonstrating genuine memory and care — is what users will share.
+This story — AI demonstrating genuine memory in a no-nonsense interface — is what users will share.
 
 ### Pattern Analysis
 
 | Aspect | Classification | Notes |
 |--------|---------------|-------|
-| **Chat interface** | Established | Users know how to text — zero learning curve |
-| **Streaming responses** | Established | ChatGPT normalized this; feels instant and alive |
+| **Terminal interface** | Retro-novel | Familiar to developers, distinctive to others |
+| **Streaming responses** | Established | ChatGPT normalized this; feels like terminal output |
 | **Emotional AI memory** | Novel | Most AI is stateless; persistent emotional context is rare |
-| **No-guilt design** | Novel | Anti-pattern to industry norms; requires intentional design |
+| **No-guilt design** | Novel | Anti-pattern to industry norms; terminal reinforces this |
 
 **Our innovation lives in the AI's emotional intelligence, not the interface.**
 
-The UI should be invisible — all innovation budget goes into how the AI *responds*, not how the user *inputs*.
+The terminal aesthetic supports this by being radically simple. No UI to compete with the conversation.
 
 ### Experience Mechanics
 
@@ -405,25 +414,25 @@ The UI should be invisible — all innovation budget goes into how the AI *respo
 | Element | Design |
 |---------|--------|
 | Trigger | Open app |
-| Landing | Directly in chat view |
-| Invitation | Empty input field, cursor ready, perhaps a soft prompt ("How's it going?") |
+| Landing | Terminal with blinking cursor at `>` prompt |
+| Invitation | Cursor blinks, ready for input. Optional: AI sends first greeting. |
 | Friction | Zero — no splash, no dashboard, no choices |
 
 **2. Interaction**
 
 | Element | Design |
 |---------|--------|
-| Input method | Single text field, bottom-anchored |
-| Send action | Tap send button or press Enter |
+| Input method | Text input after `>` prompt |
+| Send action | Press Enter (tap-to-send button available for mobile) |
 | Message length | Optimized for 1-2 sentences (but accepts more) |
-| Typing feel | Large touch target, instant keyboard appearance |
+| Typing feel | Monospace font, cursor visible, immediate response |
 
 **3. Feedback**
 
 | Element | Design |
 |---------|--------|
 | Response timing | Immediate streaming (no "thinking" delay) |
-| Visual treatment | AI messages in distinct but warm style |
+| Visual treatment | `COACH:` prefix, same amber text, streaming output |
 | Content quality | References context, acknowledges emotion, offers micro-action if appropriate |
 | Length | Concise — matches user's energy (short input → short response) |
 
@@ -432,7 +441,7 @@ The UI should be invisible — all innovation budget goes into how the AI *respo
 | Element | Design |
 |---------|--------|
 | Done signal | Natural conversation pause — user simply stops |
-| Exit action | Close app or navigate away (no "save" needed) |
+| Exit action | Close browser/app (no "save" needed) |
 | Emotional state | Lighter, supported, not burdened with tasks |
 | Next session | AI remembers everything; continuity is automatic |
 
@@ -440,102 +449,105 @@ The UI should be invisible — all innovation budget goes into how the AI *respo
 
 ### Color System
 
-**Core Palette — "Confident Warmth"**
+**Core Palette — "Amber Phosphor"**
 
 | Token | Hex | RGB | Usage |
 |-------|-----|-----|-------|
-| `--background` | #FEFDFB | 254, 253, 251 | Page background, main canvas |
-| `--background-secondary` | #FAF8F5 | 250, 248, 245 | Cards, elevated surfaces |
-| `--foreground` | #2D2A26 | 45, 42, 38 | Primary text |
-| `--foreground-muted` | #6B6560 | 107, 101, 96 | Secondary text, placeholders |
-| `--border` | #E8E4DF | 232, 228, 223 | Dividers, input borders |
-| `--accent` | #E59500 | 229, 149, 0 | Primary actions, highlights (amber-500) |
-| `--accent-soft` | #FEF3E2 | 254, 243, 226 | Hover states, subtle highlights |
-| `--accent-foreground` | #FFFFFF | 255, 255, 255 | Text on accent backgrounds |
+| `--terminal-bg` | #0a0a0a | 10, 10, 10 | Terminal background (near-black) |
+| `--terminal-bg-light` | #141414 | 20, 20, 20 | Input area, elevated surfaces |
+| `--terminal-amber` | #ffb000 | 255, 176, 0 | Primary text (P3 amber phosphor) |
+| `--terminal-amber-bright` | #ffc940 | 255, 201, 64 | Emphasized text, headings |
+| `--terminal-amber-dim` | #b37a00 | 179, 122, 0 | Secondary text, timestamps, dimmed |
+| `--terminal-border` | #2a2a2a | 42, 42, 42 | Subtle borders, ASCII frames |
+| `--terminal-glow` | rgba(255, 176, 0, 0.4) | — | Text-shadow glow effect |
 
-**Semantic Colors — No Judgment**
+**Semantic Colors — Terminal Simplicity**
 
-Our "no guilt" principle means avoiding traditional red/green success/failure indicators. Instead:
+The terminal aesthetic uses ONE color (amber) with variations in brightness. No red/green indicators.
 
-| Purpose | Traditional | Our Approach | Hex |
-|---------|-------------|--------------|-----|
-| **Success/Positive** | Green | Soft amber (celebratory) | #E59500 |
-| **Neutral info** | Blue | Warm gray | #6B6560 |
-| **Gentle warning** | Yellow/Orange | Muted amber | #D4A574 |
-| **Error (system only)** | Red | Soft coral (not aggressive) | #D4756A |
+| Purpose | Approach | Implementation |
+|---------|----------|----------------|
+| **Normal text** | Standard amber | `--terminal-amber` |
+| **Emphasis** | Brighter amber | `--terminal-amber-bright` |
+| **Secondary/Dim** | Darker amber | `--terminal-amber-dim` |
+| **System error** | Same amber, prefixed | `ERROR:` prefix, same color |
+| **User input** | Preceded by prompt | `> ` prefix identifies user text |
+| **AI response** | Preceded by label | `COACH:` prefix identifies AI text |
 
-*Note: Error states are for system errors only (failed to send, network issues) — never for user "failures" like missed goals.*
+*Note: No color-coding for status. The terminal treats all text equally. Meaning comes from words, not colors.*
 
-**Message Bubble Colors**
+**CRT Effects (Optional)**
 
-| Element | Background | Text |
-|---------|------------|------|
-| User message | `--accent` (#E59500) | White |
-| AI message | `--background-secondary` (#FAF8F5) | `--foreground` |
+| Effect | CSS Implementation | Usage |
+|--------|-------------------|-------|
+| **Phosphor glow** | `text-shadow: 0 0 8px var(--terminal-glow)` | Applied to all text |
+| **Scanlines** | `background: repeating-linear-gradient(...)` | Subtle overlay, 50% opacity max |
+| **Screen curve** | `border-radius` on container edges | Optional, very subtle |
+| **Vignette** | `radial-gradient` darkening edges | Optional ambient effect |
 
 ### Typography System
 
 **Font Stack**
 
-| Role | Font | Fallback |
-|------|------|----------|
-| Primary | Inter | -apple-system, system-ui, sans-serif |
-| Alternative | Plus Jakarta Sans | Inter, sans-serif |
+| Priority | Font | Notes |
+|----------|------|-------|
+| 1st | IBM Plex Mono | Clean, highly readable monospace |
+| 2nd | Fira Code | Popular with developers, ligature support |
+| 3rd | JetBrains Mono | Modern monospace alternative |
+| Fallback | 'Courier New', monospace | Universal fallback |
 
-*Inter is clean and highly legible. Plus Jakarta Sans adds slightly more warmth — evaluate during implementation.*
+**Recommended:** IBM Plex Mono — it has the best balance of authenticity and readability.
 
-**Type Scale (Mobile-First)**
+**Type Scale (Terminal-Appropriate)**
 
 | Token | Size | Weight | Line Height | Usage |
 |-------|------|--------|-------------|-------|
-| `--text-xs` | 12px | 400 | 1.5 | Timestamps, metadata |
-| `--text-sm` | 14px | 400 | 1.5 | Secondary text, captions |
-| `--text-base` | 16px | 400 | 1.6 | Body text, messages |
-| `--text-lg` | 18px | 500 | 1.5 | Emphasis, subheadings |
-| `--text-xl` | 20px | 600 | 1.4 | Section headings |
-| `--text-2xl` | 24px | 600 | 1.3 | Page titles |
+| `--text-xs` | 12px | 400 | 1.4 | Timestamps, system messages |
+| `--text-sm` | 14px | 400 | 1.5 | Secondary text, help text |
+| `--text-base` | 16px | 400 | 1.6 | Primary text, conversation |
+| `--text-lg` | 18px | 500 | 1.5 | ASCII art headers, emphasis |
+| `--text-xl` | 20px | 400 | 1.4 | Terminal title (if shown) |
 
 **Typography Principles**
 
-1. **Generous line height** — 1.5-1.6 for body text; reading should feel effortless
-2. **Semi-bold, not bold** — Headings use 600 weight max; nothing shouty
-3. **Size for thumb distance** — Mobile text never below 14px for interactive elements
-4. **Warmth through spacing** — Letter-spacing slightly loose for friendly feel
+1. **Monospace only** — No mixing fonts. Everything in the same monospace family.
+2. **Generous line height** — 1.6 for body text; essential for readability on dark backgrounds
+3. **No bold abuse** — Use brightness variation (`--terminal-amber-bright`) instead of heavy weights
+4. **Character alignment** — Monospace ensures ASCII art and box-drawing characters align perfectly
 
 ### Spacing & Layout Foundation
 
-**Base Unit: 4px**
+**Base Unit: Character Width**
 
-All spacing derives from a 4px base, but primary increments use 8px multiples for visual rhythm.
+In a terminal, spacing often relates to character width. For a 16px monospace font, one character ≈ 9.6px wide.
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--space-1` | 4px | Tight gaps, icon padding |
-| `--space-2` | 8px | Inline spacing, small gaps |
-| `--space-3` | 12px | Related element spacing |
-| `--space-4` | 16px | Component internal padding |
-| `--space-5` | 20px | Between components |
-| `--space-6` | 24px | Section spacing |
-| `--space-8` | 32px | Major section breaks |
-| `--space-10` | 40px | Page-level margins |
+| `--space-1` | 4px | Minimal gaps |
+| `--space-2` | 8px | ~1 character width |
+| `--space-3` | 16px | ~2 characters, standard padding |
+| `--space-4` | 24px | Between conversation turns |
+| `--space-6` | 32px | Section breaks |
+| `--space-8` | 48px | Major divisions |
 
 **Layout Principles**
 
 | Principle | Implementation |
 |-----------|----------------|
-| **Generous breathing room** | Minimum 16px padding on all containers |
-| **Mobile-first margins** | 16px horizontal page margins on mobile, 24px+ on desktop |
-| **Conversation density** | 8px between message bubbles (tight enough to feel connected) |
-| **Touch targets** | Minimum 44x44px for all interactive elements |
+| **Fixed-width terminal** | Max-width 800px, centered on large screens |
+| **Full-width on mobile** | Terminal fills viewport on small screens |
+| **Consistent padding** | 16px horizontal padding at all sizes |
+| **Line-based spacing** | Vertical rhythm based on line-height |
 
-**Chat Layout Specifics**
+**Terminal Layout Specifics**
 
 | Element | Specification |
 |---------|---------------|
-| Message bubble max-width | 85% of container (prevents wall-of-text feel) |
-| Input bar height | 56px minimum (comfortable thumb reach) |
-| Input bar padding | 16px horizontal, safe-area-aware on mobile |
-| Keyboard spacing | Input stays visible above keyboard |
+| Terminal max-width | 800px (approximately 80 characters) |
+| Terminal min-height | 100vh (fills viewport) |
+| Input area height | Auto, min 48px |
+| Line spacing | 1.6 line-height, 8px between conversation turns |
+| Prompt character | `> ` (greater-than + space) |
 
 ### Accessibility Considerations
 
@@ -543,62 +555,93 @@ All spacing derives from a 4px base, but primary increments use 8px multiples fo
 
 | Combination | Ratio | Status |
 |-------------|-------|--------|
-| Foreground on Background | ~15:1 | Exceeds AA |
-| Muted text on Background | ~4.8:1 | Passes AA |
-| Accent on Background | ~3.2:1 | Use for large text/icons only |
-| White on Accent | ~3.5:1 | Passes AA for large text |
+| Amber (#ffb000) on Black (#0a0a0a) | ~12:1 | Exceeds AA |
+| Dim amber (#b37a00) on Black | ~6.5:1 | Passes AA |
+| Bright amber (#ffc940) on Black | ~14:1 | Exceeds AA |
+
+*Amber on dark is excellent for accessibility — better than green phosphor.*
 
 **Touch & Interaction**
 
 | Requirement | Implementation |
 |-------------|----------------|
-| Minimum touch target | 44x44px (iOS HIG standard) |
-| Focus indicators | Soft amber ring (2px, visible on all backgrounds) |
-| Tap feedback | Subtle scale + opacity change on press |
-| Keyboard navigation | Full support via Radix UI primitives |
+| Minimum touch target | 44x44px for send button, input area fills width |
+| Focus indicators | Amber glow ring (box-shadow with --terminal-glow) |
+| Tap feedback | Brief brightness increase on interactive elements |
+| Keyboard navigation | Tab moves between input and any controls |
 
 **Motion & Animation**
 
 | Type | Approach |
 |------|----------|
-| Transitions | 150-200ms ease-out (snappy, not sluggish) |
-| Loading states | Gentle pulse, warm skeleton colors |
-| Streaming text | Character-by-character, no jarring reflows |
-| Reduced motion | Respect `prefers-reduced-motion` media query |
+| Cursor blink | `animation: blink 1s step-end infinite` |
+| Text streaming | Character-by-character append, no animation |
+| Transitions | Minimal, 100-150ms for state changes |
+| Reduced motion | Respect `prefers-reduced-motion` — disable cursor blink, scanlines |
+
+**Readability Safeguards**
+
+| Concern | Mitigation |
+|---------|------------|
+| Eye strain on dark | Generous line-height, not-quite-black background |
+| Scanline interference | Maximum 30% opacity, disable option available |
+| Glow causing blur | Subtle glow only, high-contrast text always readable |
+| Small text | Minimum 14px, prefer 16px for conversation |
 
 ## Design Direction
 
-### Chosen Direction: "Confident Warmth"
+### Chosen Direction: "Warm Terminal"
 
 A single cohesive visual direction synthesizing all decisions made throughout this process:
-- **Structure:** Clean minimalism with confident typography (Factory.ai influence)
-- **Warmth:** Soft amber accents, warm neutrals, rounded corners (Headspace influence)
-- **Interaction:** Chat-first, bottom-anchored input, streaming responses (iMessage influence)
+- **Aesthetic:** Retro CRT terminal with amber phosphor display
+- **Warmth:** Comes from the AI's words, not the pixels — contrast is intentional
+- **Interaction:** Terminal-first, prompt-based input, streaming text output
 
 ### Visual Identity Summary
 
 | Element | Decision |
 |---------|----------|
-| Primary color | Soft amber (#E59500) |
-| Background | Warm off-white (#FEFDFB) |
-| Typography | Inter, semi-bold headings |
-| Border radius | Generous (12-20px) |
-| AI representation | Subtle icon (warm circle with simple face) |
-| Message bubbles | User = amber, AI = warm gray |
+| Primary color | Amber phosphor (#ffb000) |
+| Background | Near-black (#0a0a0a) |
+| Typography | IBM Plex Mono, consistent weight |
+| Border radius | None or minimal (2px max) |
+| AI representation | `COACH:` text prefix (no icons) |
+| Message display | Scrolling terminal output, no bubbles |
 
 ### Screen Hierarchy
 
 | Screen | Role | Access |
 |--------|------|--------|
-| **Chat** | Primary — user lands here | Default home |
-| **Goals** | Secondary — view/edit goals | Menu or swipe |
-| **Settings** | Tertiary — integrations, account | Menu only |
+| **Terminal** | Primary — user lands at prompt | Default home |
+| **Goals** | Secondary — text list via `/goals` | Command or menu |
+| **Settings** | Tertiary — via `/settings` | Command or menu |
+| **Help** | Reference — via `/help` | Command |
 
-### Design Mockup
+### Terminal Mockup
 
-Interactive HTML mockup available at: `_bmad-output/planning-artifacts/ux-design-mockup.html`
+```
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  RESOLUTION TRACKER v1.0                                           [—][□][×] ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║  COACH: Good to see you. How's it going today?                               ║
+║                                                                              ║
+║  > skipped the gym again, work was insane                                    ║
+║                                                                              ║
+║  COACH: Tuesdays have been rough lately. Work still chaotic? Remember —      ║
+║  even 10 minutes counts. What's one small thing you could do tonight?        ║
+║                                                                              ║
+║  > maybe just some stretching before bed                                     ║
+║                                                                              ║
+║  COACH: That's the move. Stretching is underrated. Let me know how it        ║
+║  goes tomorrow.                                                              ║
+║                                                                              ║
+║  > ▌                                                                         ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+```
 
-Demonstrates all four key screens with actual colors, typography, and component styling applied.
+*Note: ASCII frame is optional — can use minimal chrome or full retro frame based on preference.*
 
 ## User Journey Flows
 
@@ -606,27 +649,26 @@ Demonstrates all four key screens with actual colors, typography, and component 
 
 **Goal:** New user goes from signup to first meaningful conversation in under 2 minutes.
 
-**Entry point:** Magic link email → App opens
+**Entry point:** Magic link email → Terminal opens
 
 ```mermaid
 flowchart TD
-    A[Magic Link Clicked] --> B[App Opens]
-    B --> C[Welcome Screen]
-    C --> D[User taps 'Start Talking']
-    D --> E[Chat View - AI asks first question]
-    E --> F[User types first goal]
-    F --> G[AI acknowledges + asks clarifying question]
-    G --> H[Brief back-and-forth]
-    H --> I[AI summarizes: 'Got it. You want to...']
-    I --> J[User confirms or adjusts]
-    J --> K[Goal saved - conversation continues naturally]
+    A[Magic Link Clicked] --> B[Terminal Opens]
+    B --> C[Cursor blinking at prompt]
+    C --> D[AI sends first greeting]
+    D --> E[User types first goal at prompt]
+    E --> F[AI acknowledges + asks clarifying question]
+    F --> G[Brief back-and-forth in terminal]
+    G --> H[AI summarizes: 'Got it. You want to...']
+    H --> I[User confirms or adjusts]
+    I --> J[Goal saved - conversation continues]
 ```
 
 **Key UX decisions:**
-- No traditional onboarding forms — everything is conversational
-- AI asks one question at a time (not overwhelming)
-- User can set 1-5 goals through natural conversation
-- No forced "complete your profile" step
+- No onboarding screens — straight to terminal prompt
+- AI initiates with a simple greeting, then asks about goals
+- Everything happens in the terminal — no forms, no wizards
+- Goal setup feels like a conversation, not configuration
 
 **Success moment:** AI's first contextual response ("So you want to hit the gym but mornings are tough?")
 
@@ -640,27 +682,27 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[User Opens App] --> B[Lands in Chat]
-    B --> C{Previous conversation visible}
-    C --> D[User types check-in message]
-    D --> E[Message sent instantly]
-    E --> F[AI response streams]
+    A[User Opens App] --> B[Terminal with prompt]
+    B --> C[Previous conversation scrolled above]
+    C --> D[User types at prompt]
+    D --> E[Press Enter to send]
+    E --> F[AI response streams in terminal]
     F --> G{Response type}
-    G -->|Win| H[Warm acknowledgment]
+    G -->|Win| H[Simple acknowledgment text]
     G -->|Miss| I[Acceptance + micro-suggestion]
     G -->|Neutral| J[Curious follow-up question]
-    H --> K[User closes app or continues]
+    H --> K[User closes terminal or continues]
     I --> K
     J --> K
 ```
 
 **Key UX decisions:**
-- Conversation history visible but not highlighted (no "you last checked in X days ago")
+- Conversation history visible in scroll-back (like a real terminal)
+- No timestamps highlighted, no "last seen" indicators
 - AI matches user's energy (short input → concise response)
-- Micro-suggestions offered gently, not prescriptively
-- No confirmation needed to send — tap send, done
+- Enter to send — no button required (but available for mobile)
 
-**Success moment:** AI references past context ("Tuesdays have been hard lately...")
+**Success moment:** AI references past context ("Tuesdays have been rough lately...")
 
 ---
 
@@ -668,34 +710,31 @@ flowchart TD
 
 **Goal:** User connects Notion and/or Zapier to sync their data.
 
-**Entry point:** User navigates to Settings via menu
+**Entry point:** User types `/settings` or accesses menu
 
 ```mermaid
 flowchart TD
-    A[User taps menu icon] --> B[Menu slides out]
-    B --> C[User taps 'Settings']
-    C --> D[Settings screen]
-    D --> E[User sees Integrations section]
-    E --> F{Which integration?}
-    F -->|Notion| G[Tap Notion → OAuth popup]
-    G --> H[User authorizes in Notion]
-    H --> I[Return to app → Pick database]
-    I --> J[Notion connected - shows 'Connected']
-    F -->|Zapier| K[Tap Zapier → Show webhook URL]
-    K --> L[User copies URL]
-    L --> M[Instructions: 'Paste in Zapier']
-    M --> N[Test event sent → Zapier receives]
-    J --> O[User returns to chat - integrations active]
-    N --> O
+    A[User types /settings] --> B[Settings display in terminal]
+    B --> C[Text-based menu of options]
+    C --> D[User types number or command]
+    D --> E{Which integration?}
+    E -->|Notion| F[Display OAuth instructions]
+    F --> G[User follows link → OAuth popup]
+    G --> H[Return to terminal → Connected status]
+    E -->|Zapier| I[Display webhook URL in terminal]
+    I --> J[User copies URL]
+    J --> K[Instructions displayed as text]
+    K --> L[User returns to conversation]
+    H --> L
 ```
 
 **Key UX decisions:**
-- OAuth flow handles Notion auth (no manual API keys)
-- Zapier is webhook-based (user copies URL, pastes in Zapier)
-- Clear confirmation when connection succeeds
-- User can always return to settings to disconnect
+- Settings accessed via command (`/settings`) or minimal menu
+- All instructions displayed as terminal text
+- OAuth opens in new window, returns to terminal
+- Clear text confirmation when connection succeeds
 
-**Success moment:** Goals appear in Notion within seconds of connecting.
+**Success moment:** `SYSTEM: Notion connected successfully.`
 
 ---
 
@@ -707,31 +746,26 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[User Opens App] --> B[Lands in Chat]
+    A[User Opens App] --> B[Terminal with prompt]
     B --> C{Time since last interaction}
-    C -->|< 7 days| D[Normal greeting or continue conversation]
-    C -->|7-30 days| E[Warm re-entry: 'Good to see you']
-    C -->|30+ days| F[Fresh start offered]
+    C -->|< 7 days| D[Prompt ready, AI may greet in first response]
+    C -->|7-30 days| E[AI greets warmly when user types]
+    C -->|30+ days| F[AI offers fresh start option in text]
     E --> G[AI does NOT mention days count]
-    G --> H[User types update or greeting]
+    G --> H[User types at prompt]
     H --> I[AI responds warmly with context]
-    I --> J{User might want changes}
-    J -->|Yes| K[Offer to adjust goals: 'Want to simplify?']
-    J -->|No| L[Continue naturally]
-    K --> M[User can reduce, pause, or restart goals]
-    M --> L
-    F --> N[Offer fresh conversation or continue]
-    N --> L
+    I --> J[Conversation continues naturally]
+    F --> J
+    D --> J
 ```
 
 **Key UX decisions:**
-- NO guilt messaging ("You've been gone for 17 days!")
-- NO streak-lost notifications
-- AI greets warmly regardless of absence length
-- Fresh start option available but not pushed
-- Goals remain intact — user chooses whether to modify
+- NO guilt messaging (no "You've been gone for 17 days!")
+- Terminal simply shows the prompt — neutral, ready
+- AI warmth comes through in the response text
+- Fresh start option offered conversationally, not as a popup
 
-**Success moment:** "Hey, good to see you. How are you doing?" — not mentioning the gap.
+**Success moment:** `COACH: Good to see you. How are things?` — no mention of the gap.
 
 ---
 
@@ -741,11 +775,11 @@ flowchart TD
 
 | Pattern | Implementation |
 |---------|----------------|
-| **Chat as home** | Every journey starts or returns to chat view |
-| **Conversational-first** | No forms, no wizards — everything through dialogue |
-| **No guilt mechanics** | Time gaps never mentioned, no negative indicators |
-| **Streaming feedback** | All AI responses appear character-by-character |
-| **Minimal navigation** | Maximum 2 taps to any secondary screen |
+| **Terminal as home** | Every journey starts or returns to the prompt |
+| **Text-first** | No forms, no wizards — everything through typing |
+| **No guilt mechanics** | Time gaps never mentioned, no counters |
+| **Streaming output** | All AI responses stream character-by-character |
+| **Command-based navigation** | `/help`, `/goals`, `/settings` for secondary screens |
 
 ---
 
@@ -754,313 +788,362 @@ flowchart TD
 1. **Time to value < 30 seconds** — User should feel supported within half a minute of any action
 2. **One question at a time** — Never overwhelm with multiple asks
 3. **Context over configuration** — AI infers preferences from conversation, doesn't ask for settings
-4. **Graceful degradation** — If something fails (network, AI error), message clearly and offer retry
-5. **Always recoverable** — No destructive actions without clear undo or confirmation
+4. **Graceful degradation** — If something fails, display `ERROR:` message with retry instruction
+5. **Always recoverable** — No destructive actions without clear confirmation prompt
 
 ## Component Strategy
 
-### Design System Components (shadcn/ui)
+### Terminal Component Architecture
 
-**Available and will use as-is:**
+The terminal aesthetic requires purpose-built components. We're not using shadcn/ui card/button patterns — everything is text-based.
 
-| Component | Usage | Customization |
-|-----------|-------|---------------|
-| `Button` | Send message, CTA buttons | Warm colors, rounded-xl |
-| `Input` | Base for chat input | Larger touch target |
-| `Card` | Settings items, goal cards | Softer shadows, warm borders |
-| `Avatar` | AI icon representation | Custom warm styling |
-| `Skeleton` | Loading states | Warm gray pulse color |
-| `Sheet` | Slide-out menu/navigation | From right on mobile |
-| `Dialog` | Confirmations (delete goal) | Minimal, warm styling |
-| `Toast` | System messages (sent, error) | Warm colors, soft coral for errors |
+**Component Philosophy:**
+- Everything renders as text in a monospace font
+- No rounded corners, no shadows, no gradients
+- Interactivity through keyboard (Enter, arrows) with touch fallbacks
+- ASCII characters for structure where needed
 
-### Custom Components
+### Core Components
 
-#### ChatBubble
+#### TerminalWindow
 
-**Purpose:** Display individual messages in the conversation thread.
+**Purpose:** Main container that holds the entire terminal interface.
 
 | Property | Details |
 |----------|---------|
-| **Variants** | `user` (amber background, right-aligned) / `ai` (warm gray, left-aligned with icon) |
-| **Content** | Text message, supports basic markdown (bold, italic) |
-| **States** | Default, Streaming (cursor blink), Sending (slight opacity) |
-| **Anatomy** | `[AI Icon?] [Bubble Container [Message Text] ] [Timestamp?]` |
+| **Layout** | Full viewport height, max-width 800px, centered |
+| **Content** | TerminalOutput (scrollable) + TerminalInput (fixed bottom) |
+| **Optional** | ASCII frame border, title bar with fake buttons |
 
 **Specifications:**
 ```
-- Max width: 85% of container
-- Padding: 12px 16px
-- Border radius: 16px (with 4px on tail corner)
-- User bubble: bg-accent, text-white, align-right
-- AI bubble: bg-background-secondary, text-foreground, align-left
-- AI icon: 28px circle, accent-soft background, positioned bottom-left of bubble
-- Timestamp: Optional, text-xs, foreground-muted, below bubble
-```
-
-**Accessibility:**
-- Messages in semantic list (`<ul>` / `<li>`)
-- Screen reader announces "You said:" / "Coach said:" prefix
-- Streaming state announced: "Coach is typing..."
-
----
-
-#### ChatInput
-
-**Purpose:** Message composition area anchored to bottom of chat view.
-
-| Property | Details |
-|----------|---------|
-| **Elements** | Text input + Send button |
-| **States** | Empty, Has text, Sending, Disabled |
-| **Behavior** | Send on button tap or Enter key; clear after send |
-
-**Specifications:**
-```
-- Container: sticky bottom, safe-area-inset-bottom aware
-- Background: background with subtle top border
-- Input wrapper: rounded-xl, background-secondary, 1px border
-- Input field: 16px font, no border, transparent background
-- Send button: 36px circle, accent background, white icon
-- Send disabled: when input empty (button opacity 0.5)
-- Total height: 56px minimum (input area)
-- Padding: 12px horizontal, 16px vertical
-```
-
-**Accessibility:**
-- Input has `aria-label="Message"`
-- Send button has `aria-label="Send message"`
-- Focus ring visible on input and button
-- Enter key triggers send (Shift+Enter for newline if supporting multiline)
-
----
-
-#### GoalCard
-
-**Purpose:** Display a single goal in the goals list view.
-
-| Property | Details |
-|----------|---------|
-| **Content** | Goal name, last check-in date (optional) |
-| **States** | Active, Completed (subtle strikethrough) |
-| **Actions** | Tap to view/edit (future), Swipe to delete (future) |
-
-**Specifications:**
-```
-- Background: background-secondary
-- Border: 1px border, rounded-2xl
+- Background: var(--terminal-bg) #0a0a0a
+- Font: IBM Plex Mono, 16px, line-height 1.6
 - Padding: 16px
-- Goal name: text-base (15px), font-medium
-- Last check-in: text-sm, foreground-muted
-- Completed state: opacity 0.7, goal name strikethrough
-- NO progress bars, NO percentages, NO color-coded status
+- Max-width: 800px (centered on desktop)
+- Min-height: 100vh or 100dvh
+- Optional frame: ASCII box-drawing characters
+- Optional glow: subtle radial gradient overlay
 ```
 
-**Accessibility:**
-- Card is a button or link (focusable)
-- Goal name is heading level for screen readers
-- Completed state announced: "Completed: [goal name]"
+**ASCII Frame Option:**
+```
+╔══════════════════════════════════════════════════╗
+║  RESOLUTION TRACKER                    [—][□][×] ║
+╠══════════════════════════════════════════════════╣
+║                                                  ║
+║  (content here)                                  ║
+║                                                  ║
+╚══════════════════════════════════════════════════╝
+```
 
 ---
 
-#### MenuSheet
+#### TerminalOutput
 
-**Purpose:** Slide-out navigation for accessing secondary screens.
+**Purpose:** Scrollable area displaying conversation history.
 
 | Property | Details |
 |----------|---------|
-| **Elements** | Logo/title, nav items (Goals, Settings), close area |
-| **Trigger** | Hamburger icon in chat header |
-| **Behavior** | Slides in from right, overlay behind |
+| **Content** | Array of TerminalLine components |
+| **Scroll** | Auto-scroll to bottom on new content |
+| **History** | Preserves scroll position when user scrolls up |
 
 **Specifications:**
 ```
-- Width: 280px (or 80% on very small screens)
-- Background: background
-- Overlay: black @ 50% opacity
-- Animation: 200ms ease-out slide
-- Nav items: 48px height, full-width tap targets
-- Dividers: 1px border between sections
+- Flex: 1 (fills available space)
+- Overflow-y: auto
+- Scroll behavior: smooth
+- Auto-scroll: on new message (unless user has scrolled up)
+- Padding-bottom: space for input area
 ```
-
-**Accessibility:**
-- Focus trapped when open
-- Escape key closes
-- `aria-modal="true"`, `role="dialog"`
-- First item auto-focused on open
 
 ---
 
-#### WelcomeScreen
+#### TerminalLine
 
-**Purpose:** First-open experience before entering chat.
+**Purpose:** Single line of conversation (user input or AI response).
 
 | Property | Details |
 |----------|---------|
-| **Content** | Welcome headline, subtext, prompt preview, CTA button |
-| **States** | Default only (shown once per new user) |
-| **Exit** | Tap CTA → navigate to chat with AI's first message |
+| **Variants** | `user` (prefixed with `> `), `ai` (prefixed with `COACH: `), `system` (prefixed with `SYSTEM: `) |
+| **Content** | Plain text, may wrap across multiple lines |
+| **States** | Static, Streaming (for AI responses) |
 
 **Specifications:**
 ```
-- Full-screen, vertically centered content
-- Headline: text-2xl, font-semibold
-- Subtext: text-base, foreground-muted, max-width 280px
-- Prompt card: background-secondary, rounded-xl, 16px padding
-- CTA: Full-width button, accent background, "Start Talking"
+- User line: "> " prefix in dim amber, message in standard amber
+- AI line: "COACH: " prefix in bright amber, message in standard amber
+- System line: "SYSTEM: " prefix in dim amber, message in dim amber
+- Line spacing: margin-bottom 8px between conversation turns
+- Word wrap: break-word (long text wraps naturally)
+- Streaming: cursor character (▌) blinks at end during streaming
+```
+
+**Example Output:**
+```
+> skipped the gym again
+
+COACH: Tuesdays have been rough lately. Work still chaotic?
+What's one small thing you could do tonight?
+
+> maybe just stretching
+
+COACH: That's the move. Let me know how it goes.
+```
+
+**Accessibility:**
+- Use `role="log"` on container with `aria-live="polite"`
+- Screen reader announces new messages
+- Prefixes ("You said:", "Coach said:") for screen readers via `aria-label`
+
+---
+
+#### TerminalInput
+
+**Purpose:** Text input area for user messages.
+
+| Property | Details |
+|----------|---------|
+| **Elements** | Prompt character (`> `), text input, optional send button (mobile) |
+| **States** | Ready, Typing, Sending, Disabled |
+| **Behavior** | Enter to send, clear after send, focus on load |
+
+**Specifications:**
+```
+- Position: sticky bottom or fixed bottom
+- Background: var(--terminal-bg-light) #141414
+- Padding: 16px
+- Prompt: "> " in dim amber, inline before input
+- Input: transparent background, amber text, no border
+- Cursor: custom blinking block cursor (CSS)
+- Send button (mobile): Optional, amber text "SEND" or arrow icon
+- Min-height: 48px
+```
+
+**Cursor Animation:**
+```css
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+.cursor { animation: blink 1s step-end infinite; }
+```
+
+**Accessibility:**
+- Input has `aria-label="Type your message"`
+- Enter triggers send
+- Focus visible with amber glow ring
+
+---
+
+#### CommandOutput
+
+**Purpose:** Formatted output for commands like `/help`, `/goals`, `/settings`.
+
+| Property | Details |
+|----------|---------|
+| **Content** | Structured text with headers, lists, tables |
+| **Format** | Uses ASCII characters for structure |
+
+**Example: /help Output:**
+```
+╭─────────────────────────────────────────────────╮
+│  AVAILABLE COMMANDS                             │
+├─────────────────────────────────────────────────┤
+│  /goals     - View your current goals           │
+│  /settings  - Manage integrations & preferences │
+│  /help      - Show this help message            │
+│  /clear     - Clear conversation history        │
+╰─────────────────────────────────────────────────╯
+```
+
+**Example: /goals Output:**
+```
+YOUR GOALS
+──────────
+1. [active]  Hit the gym 3x per week
+2. [active]  Learn Spanish (15 min daily)
+3. [done]    Read 12 books this year ✓
+```
+
+---
+
+#### SystemMessage
+
+**Purpose:** Non-conversational system notifications.
+
+| Property | Details |
+|----------|---------|
+| **Types** | Info, Error, Success |
+| **Style** | Dim amber, prefixed with `SYSTEM:` |
+
+**Examples:**
+```
+SYSTEM: Connected to Notion successfully.
+SYSTEM: ERROR - Network unavailable. Retrying...
+SYSTEM: Your message has been sent.
 ```
 
 ---
 
 ### Component Implementation Strategy
 
-**Build Order (by journey dependency):**
+**Build Order:**
 
 | Phase | Components | Unlocks |
 |-------|------------|---------|
-| **1. Core Chat** | ChatBubble, ChatInput | Journey 1, 2, 4 (all chat-based) |
-| **2. Navigation** | MenuSheet | Access to Goals, Settings |
-| **3. Secondary Screens** | GoalCard, Settings items | Journey 3 (integrations) |
-| **4. Onboarding** | WelcomeScreen | Journey 1 (first-time users) |
+| **1. Terminal Shell** | TerminalWindow, TerminalOutput, TerminalInput | Basic conversation |
+| **2. Conversation** | TerminalLine (all variants) | User/AI dialogue |
+| **3. Commands** | CommandOutput, command parsing | /help, /goals, /settings |
+| **4. System** | SystemMessage | Notifications, errors |
+| **5. Effects** | Scanlines, glow (optional) | Visual polish |
 
 **Implementation Guidelines:**
 
-1. **Start with design tokens** — All components use CSS variables from Visual Foundation
-2. **Mobile-first** — Build for 320px width, enhance for larger
-3. **Accessibility from day 1** — ARIA labels, focus management, keyboard nav
-4. **Compose from primitives** — Use shadcn/ui base components where possible
-5. **Test with real content** — Use actual AI responses and goal text, not lorem ipsum
+1. **CSS Variables First** — All colors from `--terminal-*` tokens
+2. **Monospace Everything** — Single font family throughout
+3. **Keyboard-First** — Enter to send, arrow keys for history
+4. **Touch Fallbacks** — Send button visible on touch devices
+5. **Progressive Enhancement** — Works without JS for basic display
+6. **Test in Mono** — All ASCII art must align in monospace
 
 ## UX Consistency Patterns
 
 ### Feedback Patterns
 
 **Message Sending:**
-| State | Visual Feedback |
-|-------|-----------------|
-| Composing | Text appears in input, send button enabled when text present |
-| Sending | Message appears in chat immediately (optimistic), slight opacity (0.9) |
-| Sent | Full opacity, no indicator needed (assumed success) |
-| Failed | Soft coral border, subtle "!" icon, tap to retry |
+| State | Terminal Feedback |
+|-------|-------------------|
+| Composing | Text appears after `>` prompt, cursor blinks |
+| Sending | Message appears in output immediately (optimistic) |
+| Sent | No indicator needed — appears in conversation |
+| Failed | `SYSTEM: ERROR - Message failed. Press Enter to retry.` |
 
 **AI Responding:**
-| State | Visual Feedback |
-|-------|-----------------|
-| Processing | AI bubble appears with streaming cursor |
-| Streaming | Text appears character by character |
-| Complete | Cursor disappears, message complete |
-| Error | "Something went wrong. Tap to try again." in soft coral |
+| State | Terminal Feedback |
+|-------|-------------------|
+| Processing | `COACH: ` appears with blinking cursor |
+| Streaming | Text streams character-by-character after prefix |
+| Complete | Cursor moves to new input line |
+| Error | `SYSTEM: ERROR - Response failed. Type /retry or send again.` |
 
-**System Feedback (Toasts):**
-| Type | Style | Duration | Example |
-|------|-------|----------|---------|
-| Success | Amber accent, check icon | 2 seconds | "Connected to Notion" |
-| Info | Warm gray, info icon | 3 seconds | "Goals synced" |
-| Error | Soft coral, alert icon | 5 seconds (or tap to dismiss) | "Couldn't connect. Check your internet." |
+**System Feedback (Inline Text):**
+| Type | Format | Example |
+|------|--------|---------|
+| Success | `SYSTEM: [message]` | `SYSTEM: Connected to Notion.` |
+| Info | `SYSTEM: [message]` | `SYSTEM: Goals synced.` |
+| Error | `SYSTEM: ERROR - [message]` | `SYSTEM: ERROR - Network unavailable.` |
+
+*No toasts, no popups — everything appears inline in the terminal.*
 
 **No Guilt Feedback Rule:**
 - NEVER show: "You haven't checked in for X days"
 - NEVER show: "Streak lost" or similar
-- NEVER use red for user-related states (only system errors)
+- NEVER use color to indicate failure — same amber for everything
 
 ---
 
 ### Loading & Empty States
 
-**Chat Loading (Initial):**
+**Terminal Loading (Initial):**
 ```
-- Show skeleton bubbles (2-3) in warm gray
-- Fade in actual messages when ready
-- No spinner — skeletons feel faster
+SYSTEM: Connecting...
+SYSTEM: Loading conversation history...
 ```
+*Then conversation appears. No spinners, no skeletons — just text.*
 
 **AI Thinking:**
 ```
-- Immediately show empty AI bubble with cursor
-- Begin streaming as soon as first token arrives
-- No "AI is thinking..." text — just the cursor
+COACH: ▌
 ```
+*Blinking cursor after prefix indicates response incoming.*
 
-**Empty Chat (New User):**
+**Empty Terminal (New User):**
 ```
-- AI sends first message automatically: "Hey! Let's get started..."
-- Never show empty state with instructions — conversation starts immediately
+RESOLUTION TRACKER v1.0
+══════════════════════
+
+COACH: Hey! I'm your resolution coach. What's one goal
+you want to work on this year?
+
+> ▌
 ```
+*AI initiates the conversation — no empty state.*
 
 **Empty Goals List:**
 ```
-- Simple message: "No goals yet"
-- Subtext: "Chat with me to set your first goal"
-- No sad illustrations, no "getting started" wizards
+YOUR GOALS
+──────────
+No goals yet. Just chat with me to set your first one.
+
+> ▌
 ```
 
 **Offline State:**
 ```
-- Subtle banner at top: "You're offline. Messages will send when you're back."
-- Input remains enabled (queue locally)
-- Toast when back online: "Back online — messages sent"
+SYSTEM: You're offline. Messages will send when reconnected.
+
+> ▌
 ```
+*Input remains available — messages queue locally.*
 
 ---
 
 ### Navigation Patterns
 
-**Primary Navigation:**
-| Pattern | Behavior |
+**Primary Navigation (Commands):**
+| Command | Action |
+|---------|--------|
+| `/help` | Display available commands |
+| `/goals` | Display goal list |
+| `/settings` | Display settings menu |
+| `/clear` | Clear conversation history |
+
+**Menu Alternative (Touch):**
+| Element | Behavior |
 |---------|----------|
-| Menu trigger | Hamburger icon in top-right of chat header |
-| Menu style | Sheet slides from right |
-| Menu items | Goals, Settings, (future: History) |
-| Close | Tap overlay, swipe right, or tap X |
+| Menu icon | Top-right corner, hamburger or `☰` character |
+| Menu style | Displays as text list in terminal |
+| Menu items | Goals, Settings, Help, Clear |
 
 **Back Navigation:**
 | Context | Behavior |
 |---------|----------|
-| Goals → Chat | Back arrow in header, or swipe from left edge |
-| Settings → Chat | Back arrow in header |
-| Any screen → Chat | Hardware back button returns to chat |
+| After `/goals` | Type anything to return to conversation |
+| After `/settings` | Type `done` or anything to return |
+| Browser back | Returns to previous state |
 
 **Deep Linking:**
 | Link | Destination |
 |------|-------------|
-| `/` | Chat (home) |
-| `/goals` | Goals list |
-| `/settings` | Settings screen |
-| `/auth` | Magic link callback |
+| `/` | Terminal (home) |
+| `/auth` | Magic link callback → returns to terminal |
 
 ---
 
-### Button Hierarchy
+### Text Hierarchy (No Buttons)
 
-**Primary Action (CTA):**
+**User Actions:**
 ```
-- Background: accent (#E59500)
-- Text: white
-- Usage: "Start Talking", "Connect Notion", Send button
-- One per screen maximum
-```
-
-**Secondary Action:**
-```
-- Background: transparent or background-secondary
-- Border: 1px border color
-- Text: foreground
-- Usage: Cancel, Disconnect, secondary options
+- Type at prompt and press Enter
+- Commands start with `/`
+- Confirmations: type `yes` or `no`
 ```
 
-**Destructive Action:**
+**Emphasis in Text:**
 ```
-- Background: transparent
-- Text: soft coral (#D4756A)
-- Usage: Delete goal, Sign out
-- Always requires confirmation dialog
+- Standard: var(--terminal-amber)
+- Emphasis: var(--terminal-amber-bright) or UPPERCASE
+- Dim: var(--terminal-amber-dim)
 ```
 
-**Disabled State:**
+**Destructive Confirmations:**
 ```
-- Opacity: 0.5
-- Cursor: not-allowed
-- No hover effects
+SYSTEM: Delete goal "Hit the gym 3x per week"?
+Type YES to confirm, or anything else to cancel.
+
+> ▌
 ```
 
 ---
@@ -1070,22 +1153,23 @@ flowchart TD
 **Network Errors:**
 | Scenario | Response |
 |----------|----------|
-| Message fails to send | Inline retry (tap message) |
-| AI response fails | Inline retry with "Try again" button |
-| Page fails to load | Full-screen error with retry button |
-| Auth fails | Redirect to login with explanation |
+| Message fails to send | `SYSTEM: ERROR - Send failed. Press Enter to retry.` |
+| AI response fails | `SYSTEM: ERROR - Response failed. Type /retry.` |
+| Page fails to load | Show minimal terminal with error message and retry prompt |
+| Auth fails | `SYSTEM: ERROR - Authentication failed. Check your email for a new link.` |
 
 **User Errors:**
 | Scenario | Response |
 |----------|----------|
-| Empty message send | Button disabled (prevention, not error) |
-| Goal limit reached | Toast: "You can have up to 5 active goals" |
-| Invalid OAuth | Return to settings with explanation toast |
+| Empty message send | Nothing happens (Enter on empty does nothing) |
+| Unknown command | `SYSTEM: Unknown command. Type /help for options.` |
+| Goal limit reached | `SYSTEM: You have 5 goals. Complete or remove one first.` |
 
 **Error Copy Guidelines:**
-- Be specific: "Couldn't save your goal" not "Something went wrong"
-- Be helpful: Include what to do next
-- Be warm: "Let's try that again" not "Error occurred"
+- Always prefix with `SYSTEM: ERROR -`
+- Be specific about what failed
+- Suggest the next action (retry, type command, etc.)
+- Never blame the user
 
 ---
 
@@ -1093,100 +1177,115 @@ flowchart TD
 
 **When to Confirm:**
 - Deleting a goal
+- Clearing conversation history
 - Disconnecting an integration
 - Signing out
 
 **When NOT to Confirm:**
 - Sending a message
-- Adding a goal
-- Editing a goal
-- Connecting an integration (OAuth handles this)
+- Adding a goal through conversation
+- Minor edits
 
-**Confirmation Dialog Style:**
+**Confirmation Style (Terminal):**
 ```
-- Title: Action-oriented ("Delete this goal?")
-- Body: Brief consequence ("This can't be undone")
-- Buttons: Secondary (Cancel) + Destructive (Delete)
-- Default focus: Cancel button (prevent accidental deletion)
+SYSTEM: Clear all conversation history?
+This cannot be undone. Type YES to confirm.
+
+> YES
+
+SYSTEM: History cleared.
 ```
 
 ---
 
-### Keyboard Patterns (Mobile)
+### Keyboard Patterns
 
-| Context | Keyboard Behavior |
-|---------|-------------------|
-| Chat view opens | Keyboard does NOT auto-open (let user initiate) |
-| User taps input | Keyboard opens, view scrolls to keep input visible |
-| User sends message | Keyboard stays open (likely to send another) |
-| User taps outside input | Keyboard dismisses |
-| User navigates away | Keyboard dismisses |
+**Desktop:**
+| Key | Action |
+|-----|--------|
+| Enter | Send message |
+| Up Arrow | Recall previous message (command history) |
+| Down Arrow | Move forward in command history |
+| Escape | Clear current input |
+| Ctrl+L | Clear screen (like real terminal) |
 
-**Desktop Keyboard:**
-- Enter sends message
-- Shift+Enter adds newline (if multiline supported)
-- Escape closes any open modal/sheet
-- Tab navigates through focusable elements
+**Mobile:**
+| Interaction | Behavior |
+|-------------|----------|
+| Tap terminal | Focus input, keyboard appears |
+| Tap Send button | Send message (for users who don't know Enter) |
+| Swipe up | Scroll through history |
+| Tap outside input | Keyboard dismisses |
+
+**Input Behavior:**
+- Focus on input automatically when terminal loads
+- Keyboard stays open after sending (ready for next message)
+- Single-line input by default (no Shift+Enter needed)
 
 ## Responsive Design & Accessibility
 
 ### Responsive Strategy
 
-**Design Philosophy: Mobile-First, Desktop-Enhanced**
+**Design Philosophy: Terminal-Native Responsiveness**
 
-Resolution Tracker is designed for the phone in your pocket. Desktop is supported but not the primary experience — the chat-first interface naturally works well across screen sizes.
+The terminal aesthetic solves the responsive problem elegantly. A terminal is a terminal — it fills its container and text wraps naturally. No complex multi-column layouts to manage.
 
-| Device | Priority | Approach |
-|--------|----------|----------|
-| **Mobile (primary)** | High | Full feature parity, optimized for thumb |
-| **Tablet** | Medium | Same as mobile, just more breathing room |
-| **Desktop** | Low | Centered layout, wider message bubbles, keyboard shortcuts |
+| Device | Approach |
+|--------|----------|
+| **Mobile** | Terminal fills viewport, 16px padding |
+| **Tablet** | Same as mobile, more breathing room |
+| **Desktop** | Terminal max-width 800px, centered, optional frame |
 
 **What Changes on Desktop:**
-- Chat container max-width: 600px (centered)
-- Message bubbles slightly wider (max 70% instead of 85%)
-- Keyboard shortcuts enabled (Enter to send, Escape to close modals)
-- Hover states visible
-- Menu could be persistent sidebar (future consideration)
+- Terminal container: max-width 800px (approximately 80 characters)
+- Centered on screen with subtle background visible around edges
+- Optional: ASCII frame border visible
+- Keyboard shortcuts fully available (Enter, Up/Down arrows, Ctrl+L)
 
 **What Stays the Same:**
-- Core chat interface
-- Single-column layout
-- Bottom-anchored input
-- All functionality
+- Same monospace font and sizing
+- Same color scheme
+- Same interaction patterns
+- Same conversation display
+
+**The Terminal Advantage:**
+The terminal aesthetic means there's no "mobile version" vs "desktop version" — it's the same terminal on every screen. This eliminates the "centered mobile app" problem entirely.
 
 ---
 
 ### Breakpoint Strategy
 
-**Breakpoints (Tailwind defaults):**
+**Minimal Breakpoints Needed:**
 
-| Breakpoint | Width | Use Case |
-|------------|-------|----------|
-| `sm` | 640px | Small tablets, large phones landscape |
-| `md` | 768px | Tablets |
-| `lg` | 1024px | Small laptops, large tablets landscape |
-| `xl` | 1280px | Desktops |
+| Breakpoint | Width | Change |
+|------------|-------|--------|
+| `sm` | 640px | Minor padding adjustments |
+| `lg` | 1024px | Apply max-width, center terminal |
 
-**Layout Adaptations:**
+**That's it.** The terminal doesn't need complex responsive logic.
 
-| Screen | Chat Container | Message Max-Width | Input Position |
-|--------|----------------|-------------------|----------------|
-| < 640px (mobile) | 100% width | 85% | Fixed bottom |
-| 640-1023px (tablet) | 100% width | 80% | Fixed bottom |
-| ≥ 1024px (desktop) | 600px centered | 70% | Fixed bottom of container |
+**Layout Implementation:**
 
-**Mobile-First CSS Approach:**
 ```css
-/* Base: Mobile */
-.chat-container { width: 100%; }
+/* Base: All screens */
+.terminal {
+  width: 100%;
+  min-height: 100dvh;
+  padding: 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 16px;
+  line-height: 1.6;
+  background: var(--terminal-bg);
+  color: var(--terminal-amber);
+}
 
-/* Tablet */
-@media (min-width: 768px) { ... }
-
-/* Desktop */
+/* Desktop: Centered with max-width */
 @media (min-width: 1024px) {
-  .chat-container { max-width: 600px; margin: 0 auto; }
+  .terminal {
+    max-width: 800px;
+    margin: 0 auto;
+    /* Optional: add subtle border or shadow */
+  }
 }
 ```
 
@@ -1196,39 +1295,42 @@ Resolution Tracker is designed for the phone in your pocket. Desktop is supporte
 
 **Target: WCAG 2.1 Level AA**
 
-This is the industry standard for good accessibility. It covers the vast majority of users with disabilities without requiring extreme measures.
+The terminal aesthetic is inherently accessible — high contrast, simple layout, keyboard-first design.
 
 **Core Accessibility Requirements:**
 
-| Category | Requirement | Implementation |
-|----------|-------------|----------------|
-| **Color Contrast** | 4.5:1 for normal text, 3:1 for large text | Already validated in Visual Foundation |
-| **Touch Targets** | Minimum 44x44px | All buttons, input fields sized appropriately |
-| **Keyboard Navigation** | Full keyboard support | Tab through elements, Enter to activate |
-| **Screen Readers** | Semantic HTML + ARIA | Proper heading structure, ARIA labels |
-| **Focus Indicators** | Visible focus rings | Amber focus ring on all interactive elements |
-| **Reduced Motion** | Respect preferences | `prefers-reduced-motion` media query |
+| Category | Requirement | Terminal Implementation |
+|----------|-------------|------------------------|
+| **Color Contrast** | 4.5:1 minimum | Amber on black exceeds 12:1 |
+| **Touch Targets** | 44x44px minimum | Input area fills width, send button 44px+ |
+| **Keyboard Navigation** | Full support | Enter, arrows, Escape all functional |
+| **Screen Readers** | Semantic HTML + ARIA | `role="log"`, proper announcements |
+| **Focus Indicators** | Visible focus | Amber glow ring on focused elements |
+| **Reduced Motion** | Respect preferences | Disable cursor blink, scanlines |
 
-**Chat-Specific Accessibility:**
+**Terminal-Specific Accessibility:**
 
 | Element | Accessibility Approach |
 |---------|------------------------|
-| Message list | `role="log"` with `aria-live="polite"` for new messages |
-| User messages | Prefixed with "You said:" for screen readers |
-| AI messages | Prefixed with "Coach said:" for screen readers |
-| Streaming text | Announced as "Coach is typing..." then full message when complete |
-| Send button | `aria-label="Send message"` |
-| Menu | Focus trapped, Escape to close, first item focused |
+| Conversation area | `role="log"` with `aria-live="polite"` |
+| User messages | Screen reader: "You said: [message]" |
+| AI messages | Screen reader: "Coach said: [message]" |
+| Streaming text | Announced when complete, not character-by-character |
+| Input | `aria-label="Type your message"` |
+| Commands | Announced as "Command output: [content]" |
+
+**High Contrast Advantage:**
+Amber (#ffb000) on near-black (#0a0a0a) has a contrast ratio of approximately 12:1 — far exceeding WCAG AA requirements (4.5:1) and even AAA (7:1).
 
 **Accessibility Do's and Don'ts:**
 
 | Do | Don't |
 |----|-------|
-| Use semantic HTML (`<button>`, `<nav>`, `<main>`) | Use `<div>` for everything |
-| Provide text alternatives for icons | Use icon-only buttons without labels |
-| Ensure logical tab order | Rely on visual order alone |
-| Support keyboard dismiss for modals | Trap users in modals without Escape |
-| Test with actual screen readers | Assume automated tools catch everything |
+| Keep monospace font at 16px minimum | Use tiny fonts for "authenticity" |
+| Announce streaming completion | Read every character as it streams |
+| Provide keyboard shortcuts | Require mouse for any action |
+| Test with screen readers | Assume text = accessible |
+| Offer option to disable effects | Force scanlines/glow on everyone |
 
 ---
 
@@ -1239,31 +1341,30 @@ This is the industry standard for good accessibility. It covers the vast majorit
 | Method | Tools | When |
 |--------|-------|------|
 | Browser DevTools | Chrome/Firefox responsive mode | Every PR |
-| Real devices | iPhone SE, iPhone 14, Android mid-range | Before release |
-| Cross-browser | Chrome, Safari, Firefox, Edge | Before release |
+| Real devices | iPhone SE, Pixel, iPad | Before release |
+| Cross-browser | Chrome, Safari, Firefox | Before release |
 
-**Priority Devices:**
-1. iPhone SE (smallest common iPhone, 375px)
-2. iPhone 14 Pro (common flagship)
-3. Samsung Galaxy A-series (common Android)
-4. iPad (tablet baseline)
+**Priority Test Cases:**
+1. iPhone SE (375px) — smallest common viewport
+2. Desktop 1440px — verify max-width centering works
+3. Tablet 768px — ensure padding looks right
 
 **Accessibility Testing:**
 
 | Method | Tools | When |
 |--------|-------|------|
-| Automated scans | axe DevTools, Lighthouse | Every PR |
-| Keyboard testing | Manual Tab/Enter testing | Every feature |
-| Screen reader | VoiceOver (Mac/iOS), NVDA (Windows) | Before release |
-| Color contrast | WebAIM contrast checker | Design phase |
+| Automated | axe DevTools, Lighthouse | Every PR |
+| Keyboard | Manual Tab/Enter/Arrow testing | Every feature |
+| Screen reader | VoiceOver, NVDA | Before release |
+| Reduced motion | Test with preference enabled | Before release |
 
 **Testing Checklist (Per Feature):**
-- [ ] Works on iPhone SE width (375px)
-- [ ] Touch targets are 44px minimum
-- [ ] Keyboard navigable (Tab, Enter, Escape)
-- [ ] Screen reader announces correctly
-- [ ] No Lighthouse accessibility errors
-- [ ] Works in reduced motion mode
+- [ ] Works on iPhone SE (375px)
+- [ ] Keyboard navigable (Tab, Enter, Escape, Arrows)
+- [ ] Screen reader announces messages correctly
+- [ ] Works with `prefers-reduced-motion`
+- [ ] Contrast passes in all states
+- [ ] Monospace alignment preserved
 
 ---
 
@@ -1271,29 +1372,38 @@ This is the industry standard for good accessibility. It covers the vast majorit
 
 **For Developers:**
 
-**Responsive:**
+**Terminal Responsive:**
 ```
-- Use Tailwind responsive prefixes (sm:, md:, lg:)
-- Test at 320px minimum (edge case phones)
-- Use min-height: 100dvh for full-screen layouts (dvh handles mobile browser chrome)
-- Use safe-area-inset-bottom for input bar
-- Avoid fixed heights — let content flow
-```
-
-**Accessibility:**
-```
-- Every interactive element needs a visible focus state
-- Every icon button needs aria-label
-- Use <button> for actions, <a> for navigation
-- Don't disable zoom (never use maximum-scale=1)
-- Test with VoiceOver at least once per sprint
-- Use semantic elements: <main>, <nav>, <header>, <section>
+- Use 100dvh for full viewport (handles mobile browser chrome)
+- Max-width: 800px on desktop, centered with margin: 0 auto
+- 16px padding on all screen sizes
+- Let text wrap naturally — don't fight it
+- Safe-area-inset-bottom for input on notched phones
 ```
 
-**Performance (related to responsive):**
+**Terminal Accessibility:**
 ```
-- Lazy load messages beyond viewport
-- Optimize images with Next.js Image component
-- Target < 2s First Contentful Paint on 3G
-- Use streaming for AI responses (already planned)
+- role="log" on conversation container
+- aria-live="polite" for new messages
+- aria-label on input and any buttons
+- Visible focus states with amber glow
+- Don't disable text selection
+- Support system font-size preferences where possible
+```
+
+**Performance:**
+```
+- Monospace fonts are small — load IBM Plex Mono subset
+- No images to optimize (text-only UI)
+- Lazy load conversation history beyond viewport
+- Target < 1.5s First Contentful Paint (simple UI)
+- Stream AI responses for perceived performance
+```
+
+**CRT Effects (Optional):**
+```
+- Disable all effects if prefers-reduced-motion
+- Scanlines: max 30% opacity, toggleable
+- Glow: subtle only, never blur text
+- No flicker effects (accessibility concern)
 ```
