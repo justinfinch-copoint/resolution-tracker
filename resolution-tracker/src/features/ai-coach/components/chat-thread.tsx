@@ -8,7 +8,7 @@ import { ChatInput } from './chat-input';
 import { getTextFromParts } from '../types';
 import { Loader2 } from 'lucide-react';
 
-const WELCOME_MESSAGE = "Hey! I'm your resolution coach. What's on your mind today?";
+const FALLBACK_GREETING = "Hey! I'm your resolution coach. What's on your mind today?";
 
 // F7: Instantiate transport outside component to avoid recreation on each render
 const chatTransport = new DefaultChatTransport({
@@ -17,6 +17,8 @@ const chatTransport = new DefaultChatTransport({
 
 export function ChatThread() {
   const [input, setInput] = useState('');
+  const [greeting, setGreeting] = useState(FALLBACK_GREETING);
+  const [greetingLoading, setGreetingLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { messages, sendMessage, status, error } = useChat({
@@ -24,6 +26,41 @@ export function ChatThread() {
   });
 
   const isLoading = status === 'streaming' || status === 'submitted';
+
+  // Fetch dynamic greeting on mount
+  useEffect(() => {
+    const abortController = new AbortController();
+    let isMounted = true;
+
+    async function fetchGreeting() {
+      try {
+        const response = await fetch('/api/chat/greeting', {
+          signal: abortController.signal,
+        });
+        if (response.ok && isMounted) {
+          const data = await response.json();
+          if (data.greeting) {
+            setGreeting(data.greeting);
+          }
+        }
+      } catch (error) {
+        // Only log if not an abort error
+        if (error instanceof Error && error.name !== 'AbortError') {
+          console.warn('Failed to fetch greeting:', error.message);
+        }
+      } finally {
+        if (isMounted) {
+          setGreetingLoading(false);
+        }
+      }
+    }
+    fetchGreeting();
+
+    return () => {
+      isMounted = false;
+      abortController.abort();
+    };
+  }, []);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -47,7 +84,7 @@ export function ChatThread() {
           {messages.length === 0 && (
             <ChatBubble
               variant="ai"
-              content={WELCOME_MESSAGE}
+              content={greetingLoading ? '...' : greeting}
             />
           )}
 

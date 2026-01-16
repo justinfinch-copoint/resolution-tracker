@@ -3,7 +3,7 @@ export * from './types';
 
 // Core functionality
 export { buildChatContext } from './context-builder';
-export { buildSystemPrompt } from './prompts';
+export { buildSystemPrompt, buildInitialGreeting } from './prompts';
 export { createCoachTools, type CoachTools } from './tools';
 
 // Summary repository (for direct access if needed)
