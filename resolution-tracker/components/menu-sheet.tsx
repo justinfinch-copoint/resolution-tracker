@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Target, LogOut } from "lucide-react";
+import { Target, LogOut, MessageCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import {
   Sheet,
@@ -47,6 +47,14 @@ export function MenuSheet({ open, onOpenChange }: MenuSheetProps) {
           </SheetDescription>
         </SheetHeader>
         <nav className="flex flex-col mt-4">
+          <Link
+            href="/chat"
+            onClick={handleNavClick}
+            className="flex items-center gap-3 h-12 px-3 rounded-xl hover:bg-accent transition-colors"
+          >
+            <MessageCircle className="h-5 w-5" />
+            <span className="font-medium">Chat</span>
+          </Link>
           <Link
             href="/goals"
             onClick={handleNavClick}

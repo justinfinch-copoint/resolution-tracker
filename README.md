@@ -120,7 +120,48 @@ https://your-domain.com/auth/confirm
 3. Enter your email and click "Send magic link"
 4. Check your email (or Supabase dashboard > Authentication > Users for the link)
 5. Click the magic link to authenticate
-6. You should be redirected to `/protected`
+6. You should be redirected to `/chat`
+
+### Anthropic API Setup
+
+The AI coach feature uses Claude via the Anthropic API. Follow these steps to get your API key:
+
+#### 1. Create an Anthropic Account
+
+1. Go to [console.anthropic.com](https://console.anthropic.com)
+2. Sign up for an account (or sign in if you already have one)
+3. Complete any required verification steps
+
+#### 2. Get Your API Key
+
+1. In the Anthropic Console, go to **API Keys** (or click "Get API Keys")
+2. Click **Create Key**
+3. Give your key a name (e.g., "resolution-tracker-dev")
+4. Copy the key immediately - it won't be shown again!
+5. Add it to your `.env.local`:
+
+```bash
+ANTHROPIC_API_KEY=sk-ant-api03-...
+```
+
+#### 3. (Optional) Configure Model
+
+By default, the app uses `claude-sonnet-4-20250514`. You can override this:
+
+```bash
+# Optional: Use a different Claude model
+ANTHROPIC_MODEL=claude-sonnet-4-20250514
+```
+
+#### API Key Security
+
+- **Never commit your API key** - It's already in `.gitignore` via `.env.local`
+- **Set usage limits** - In the Anthropic Console, set spend limits to avoid unexpected charges
+- **Rotate keys periodically** - Create new keys and delete old ones regularly
+
+#### Pricing Note
+
+Anthropic charges based on token usage. For development and light usage, costs are typically minimal. Check [anthropic.com/pricing](https://www.anthropic.com/pricing) for current rates.
 
 ### Database
 
