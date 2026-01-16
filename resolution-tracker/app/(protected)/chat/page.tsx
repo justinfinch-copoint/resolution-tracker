@@ -1,16 +1,20 @@
-'use client';
+"use client";
 
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
+import { ChatErrorBoundary } from "@/src/features/ai-coach/components/chat-error-boundary";
 
 const ChatThread = dynamic(
-  () => import('@/src/features/ai-coach/components/chat-thread').then(mod => mod.ChatThread),
+  () =>
+    import("@/src/features/ai-coach/components/chat-thread").then(
+      (mod) => mod.ChatThread
+    ),
   { ssr: false }
 );
 
 export default function ChatPage() {
   return (
-    <div className="w-full h-[calc(100vh-64px)] -my-6 -mx-4 px-0">
+    <ChatErrorBoundary>
       <ChatThread />
-    </div>
+    </ChatErrorBoundary>
   );
 }

@@ -1,14 +1,16 @@
-'use client';
+"use client";
 
-import { useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Send, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { KeyboardEvent, useRef, useEffect } from "react";
+import { cn } from "@/lib/utils";
+import { parseCommand, type Command } from "@/lib/commands";
+
+const MAX_MESSAGE_LENGTH = 4000;
 
 type ChatInputProps = {
   value: string;
   onChange: (value: string) => void;
   onSend: () => void;
+  onCommand?: (command: Command) => void;
   isLoading?: boolean;
   placeholder?: string;
 };
@@ -17,66 +19,90 @@ export function ChatInput({
   value,
   onChange,
   onSend,
+  onCommand,
   isLoading = false,
-  placeholder = "Message your coach...",
+  placeholder = "Type a message...",
 }: ChatInputProps) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-resize textarea
   useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = 'auto';
-      textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
-    }
-  }, [value]);
+    inputRef.current?.focus();
+  }, []);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (value.trim() && !isLoading) {
-        onSend();
-      }
+  const handleSubmit = () => {
+    const trimmed = value.trim();
+    if (!trimmed || isLoading) return;
+
+    // Check if it's a command
+    const command = parseCommand(trimmed);
+    if (command && onCommand) {
+      onCommand(command);
+      onChange("");
+      return;
     }
+
+    onSend();
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && value.trim() && !isLoading) {
+      e.preventDefault();
+      handleSubmit();
+    }
+    if (e.key === "Escape") {
+      onChange("");
+    }
+  };
+
+  const handleSend = () => {
+    handleSubmit();
   };
 
   const canSend = value.trim().length > 0 && !isLoading;
 
   return (
-    <div className="sticky bottom-0 w-full bg-background border-t border-border p-4">
-      <div className="flex items-end gap-2 max-w-3xl mx-auto">
-        <div className="flex-1 relative">
-          <textarea
-            ref={textareaRef}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={placeholder}
-            disabled={isLoading}
-            rows={1}
-            className={cn(
-              "w-full resize-none rounded-2xl border border-input bg-background px-4 py-3 text-base",
-              "placeholder:text-muted-foreground",
-              "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-              "disabled:cursor-not-allowed disabled:opacity-50",
-              "min-h-[48px] max-h-[120px]"
-            )}
-          />
-        </div>
-        <Button
-          onClick={onSend}
-          disabled={!canSend}
-          size="icon"
-          className="h-12 w-12 rounded-full shrink-0"
-        >
-          {isLoading ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
-          ) : (
-            <Send className="h-5 w-5" />
-          )}
-          <span className="sr-only">Send message</span>
-        </Button>
-      </div>
+    <div
+      className={cn(
+        "flex items-center gap-2 px-4 py-4",
+        "bg-[var(--terminal-bg-light)] border-t border-[var(--terminal-border)]"
+      )}
+    >
+      <span className="text-[var(--terminal-amber-dim)] terminal-glow flex-shrink-0">
+        &gt;
+      </span>
+      <input
+        ref={inputRef}
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+        disabled={isLoading}
+        maxLength={MAX_MESSAGE_LENGTH}
+        className={cn(
+          "flex-1 bg-transparent border-none outline-none",
+          "text-[var(--terminal-amber)] terminal-glow",
+          "placeholder:text-[var(--terminal-amber-dim)] placeholder:opacity-50",
+          "caret-[var(--terminal-amber)]",
+          "disabled:opacity-50"
+        )}
+        aria-label="Message input"
+      />
+      <button
+        onClick={handleSend}
+        disabled={!canSend}
+        className={cn(
+          "px-4 py-2 text-sm",
+          "border border-[var(--terminal-amber-dim)]",
+          "text-[var(--terminal-amber-dim)]",
+          "bg-transparent transition-all duration-150",
+          "hover:border-[var(--terminal-amber)] hover:text-[var(--terminal-amber)] hover:terminal-glow",
+          "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-[var(--terminal-amber-dim)] disabled:hover:text-[var(--terminal-amber-dim)]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--terminal-amber)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--terminal-bg)]"
+        )}
+      >
+        SEND
+      </button>
     </div>
   );
 }

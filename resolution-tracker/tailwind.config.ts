@@ -10,6 +10,15 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        mono: [
+          "var(--font-ibm-plex-mono)",
+          "IBM Plex Mono",
+          "Fira Code",
+          "Courier New",
+          "monospace",
+        ],
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
@@ -51,13 +60,21 @@ export default {
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
         },
+        terminal: {
+          bg: "var(--terminal-bg)",
+          "bg-light": "var(--terminal-bg-light)",
+          amber: "var(--terminal-amber)",
+          "amber-bright": "var(--terminal-amber-bright)",
+          "amber-dim": "var(--terminal-amber-dim)",
+          border: "var(--terminal-border)",
+        },
       },
       borderRadius: {
-        lg: "var(--radius)",        // 12px
+        lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-        xl: "1rem",                 // 16px
-        "2xl": "1.25rem",           // 20px
+        xl: "1rem",
+        "2xl": "1.25rem",
       },
     },
   },

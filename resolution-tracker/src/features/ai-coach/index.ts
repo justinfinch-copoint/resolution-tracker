@@ -11,5 +11,6 @@ export { getUserSummary, getUserSummaryData, upsertUserSummary, mergeUserSummary
 
 // Components
 export { ChatThread } from './components/chat-thread';
-export { ChatBubble } from './components/chat-bubble';
 export { ChatInput } from './components/chat-input';
+export { TerminalLine } from './components/terminal-line';
+export { ChatErrorBoundary } from './components/chat-error-boundary';

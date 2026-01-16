@@ -1,3 +1,3 @@
 export * from './types';
 export * from './queries';
-export { GoalList } from './components/goal-list';
+export { TerminalGoalList } from './components/terminal-goal-list';

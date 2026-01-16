@@ -2,16 +2,6 @@
 
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -48,36 +38,65 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Sign in</CardTitle>
-          <CardDescription>
+      <div className="border border-[var(--terminal-border)] bg-[var(--terminal-bg-light)] p-6">
+        <div className="mb-6">
+          <h1 className="text-xl text-[var(--terminal-amber-bright)] terminal-glow-strong mb-2">
+            SIGN IN
+          </h1>
+          <p className="text-[var(--terminal-amber-dim)]">
             Enter your email to receive a magic link
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin}>
-            <div className="flex flex-col gap-8">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Sending link..." : "Send magic link"}
-              </Button>
+          </p>
+        </div>
+        <form onSubmit={handleLogin}>
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-2">
+              <label
+                htmlFor="email"
+                className="text-[var(--terminal-amber)] terminal-glow"
+              >
+                EMAIL:
+              </label>
+              <input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={cn(
+                  "w-full px-3 py-2",
+                  "bg-[var(--terminal-bg)] border border-[var(--terminal-border)]",
+                  "text-[var(--terminal-amber)] terminal-glow",
+                  "placeholder:text-[var(--terminal-amber-dim)] placeholder:opacity-50",
+                  "caret-[var(--terminal-amber)]",
+                  "focus:outline-none focus:border-[var(--terminal-amber)]"
+                )}
+              />
             </div>
-          </form>
-        </CardContent>
-      </Card>
+            {error && (
+              <p className="text-sm text-destructive terminal-glow">
+                ERROR: {error}
+              </p>
+            )}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={cn(
+                "w-full px-4 py-3",
+                "border border-[var(--terminal-amber)]",
+                "text-[var(--terminal-amber)] terminal-glow",
+                "bg-transparent transition-all duration-150",
+                "hover:bg-[var(--terminal-amber)] hover:text-[var(--terminal-bg)]",
+                "disabled:opacity-50 disabled:cursor-not-allowed",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--terminal-amber)]"
+              )}
+            >
+              {isLoading ? "SENDING LINK..." : "SEND MAGIC LINK"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
