@@ -1,0 +1,1 @@
+CREATE INDEX "check_ins_milestone_id_idx" ON "check_ins" USING btree ("milestone_id");

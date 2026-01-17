@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getUserGoals, canCreateGoal, transformGoalToResponse } from '@/src/features/goals/queries';
 import { createGoal } from '@/src/features/goals/repository';
-import { MAX_TITLE_LENGTH } from '@/src/features/goals/types';
-import type { CreateGoalInput } from '@/src/features/goals/types';
+import { createGoalSchema, isValidUUID } from '@/src/features/goals/types';
 
 /**
  * GET /api/goals
@@ -46,7 +45,7 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: CreateGoalInput;
+  let body: unknown;
   try {
     body = await request.json();
   } catch {
@@ -56,23 +55,20 @@ export async function POST(request: Request) {
     );
   }
 
-  // Validate title (F2: added max length)
-  if (!body.title || typeof body.title !== 'string' || body.title.trim() === '') {
+  // Validate with Zod schema
+  const parseResult = createGoalSchema.safeParse(body);
+  if (!parseResult.success) {
+    const firstError = parseResult.error.issues[0];
     return NextResponse.json(
-      { error: 'Title is required', code: 'VALIDATION_ERROR' },
+      { error: firstError.message, code: 'VALIDATION_ERROR' },
       { status: 400 }
     );
   }
 
-  if (body.title.trim().length > MAX_TITLE_LENGTH) {
-    return NextResponse.json(
-      { error: `Title must be ${MAX_TITLE_LENGTH} characters or less`, code: 'VALIDATION_ERROR' },
-      { status: 400 }
-    );
-  }
+  const input = parseResult.data;
 
   try {
-    // F4: Transaction handles atomic limit check, but we do a quick pre-check for better UX
+    // Pre-check for better UX (transaction handles atomic check)
     const canCreate = await canCreateGoal(user.id);
     if (!canCreate) {
       return NextResponse.json(
@@ -81,7 +77,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const goal = await createGoal(user.id, { title: body.title.trim() });
+    const goal = await createGoal(user.id, input);
     return NextResponse.json(transformGoalToResponse(goal), { status: 201 });
   } catch (err) {
     // Handle MAX_GOALS_REACHED from transaction (race condition protection)

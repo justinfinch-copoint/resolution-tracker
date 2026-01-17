@@ -1,4 +1,13 @@
 export * from './types';
 export * from './queries';
-// Repository exports for feature-internal use (F4)
-export { createCheckIn, getCheckInById, getRecentCheckIns, getCheckInsByUserId } from './repository';
+// Repository exports for feature-internal use
+export {
+  createCheckIn,
+  getCheckInById,
+  getRecentCheckIns,
+  getCheckInsByUserId,
+  getCheckInsByGoalId,
+  getHabitCheckInsForPeriod,
+  getLatestValueCheckIn,
+  deleteCheckIn,
+} from './repository';

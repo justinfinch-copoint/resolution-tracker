@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getUserGoalWithRelations, canActivateGoal, transformGoalToResponse } from '@/src/features/goals/queries';
-import { updateGoal, deleteGoal, getGoalById } from '@/src/features/goals/repository';
-import { isValidUUID, updateGoalSchema } from '@/src/features/goals/types';
+import { getMilestone, transformMilestoneToResponse } from '@/src/features/milestones/queries';
+import { updateMilestone, deleteMilestone } from '@/src/features/milestones/repository';
+import { isValidUUID, updateMilestoneSchema } from '@/src/features/milestones/types';
 
 type RouteParams = { params: Promise<{ id: string }> };
 
 /**
- * GET /api/goals/[id]
- * Get a single goal by ID with its milestones and implementation intentions
+ * GET /api/milestones/[id]
+ * Get a single milestone by ID
  */
 export async function GET(_request: Request, { params }: RouteParams) {
   const { id } = await params;
@@ -16,7 +16,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
   // Validate UUID format
   if (!isValidUUID(id)) {
     return NextResponse.json(
-      { error: 'Invalid goal ID format', code: 'VALIDATION_ERROR' },
+      { error: 'Invalid milestone ID format', code: 'VALIDATION_ERROR' },
       { status: 400 }
     );
   }
@@ -32,26 +32,26 @@ export async function GET(_request: Request, { params }: RouteParams) {
   }
 
   try {
-    const goal = await getUserGoalWithRelations(id, user.id);
-    if (!goal) {
+    const milestone = await getMilestone(id, user.id);
+    if (!milestone) {
       return NextResponse.json(
-        { error: 'Goal not found', code: 'NOT_FOUND' },
+        { error: 'Milestone not found', code: 'NOT_FOUND' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(goal);
+    return NextResponse.json(milestone);
   } catch {
     return NextResponse.json(
-      { error: 'Failed to fetch goal', code: 'INTERNAL_ERROR' },
+      { error: 'Failed to fetch milestone', code: 'INTERNAL_ERROR' },
       { status: 500 }
     );
   }
 }
 
 /**
- * PATCH /api/goals/[id]
- * Update a goal (title, status, and/or enhanced fields)
+ * PATCH /api/milestones/[id]
+ * Update a milestone
  */
 export async function PATCH(request: Request, { params }: RouteParams) {
   const { id } = await params;
@@ -59,7 +59,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   // Validate UUID format
   if (!isValidUUID(id)) {
     return NextResponse.json(
-      { error: 'Invalid goal ID format', code: 'VALIDATION_ERROR' },
+      { error: 'Invalid milestone ID format', code: 'VALIDATION_ERROR' },
       { status: 400 }
     );
   }
@@ -85,7 +85,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   }
 
   // Validate with Zod schema
-  const parseResult = updateGoalSchema.safeParse(body);
+  const parseResult = updateMilestoneSchema.safeParse(body);
   if (!parseResult.success) {
     const firstError = parseResult.error.issues[0];
     return NextResponse.json(
@@ -97,47 +97,26 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   const input = parseResult.data;
 
   try {
-    // Pre-check for better UX (transaction handles atomic check)
-    if (input.status === 'active') {
-      const existingGoal = await getGoalById(id, user.id);
-      if (existingGoal && existingGoal.status !== 'active') {
-        const canActivate = await canActivateGoal(user.id);
-        if (!canActivate) {
-          return NextResponse.json(
-            { error: 'Maximum active goals reached (5)', code: 'MAX_GOALS_REACHED' },
-            { status: 400 }
-          );
-        }
-      }
-    }
-
-    const updated = await updateGoal(id, user.id, input);
-    if (!updated) {
+    const milestone = await updateMilestone(id, user.id, input);
+    if (!milestone) {
       return NextResponse.json(
-        { error: 'Goal not found', code: 'NOT_FOUND' },
+        { error: 'Milestone not found', code: 'NOT_FOUND' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(transformGoalToResponse(updated));
-  } catch (err) {
-    // Handle MAX_GOALS_REACHED from transaction (race condition protection)
-    if (err instanceof Error && err.message === 'MAX_GOALS_REACHED') {
-      return NextResponse.json(
-        { error: 'Maximum active goals reached (5)', code: 'MAX_GOALS_REACHED' },
-        { status: 400 }
-      );
-    }
+    return NextResponse.json(transformMilestoneToResponse(milestone));
+  } catch {
     return NextResponse.json(
-      { error: 'Failed to update goal', code: 'INTERNAL_ERROR' },
+      { error: 'Failed to update milestone', code: 'INTERNAL_ERROR' },
       { status: 500 }
     );
   }
 }
 
 /**
- * DELETE /api/goals/[id]
- * Delete a goal
+ * DELETE /api/milestones/[id]
+ * Delete a milestone
  */
 export async function DELETE(_request: Request, { params }: RouteParams) {
   const { id } = await params;
@@ -145,7 +124,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
   // Validate UUID format
   if (!isValidUUID(id)) {
     return NextResponse.json(
-      { error: 'Invalid goal ID format', code: 'VALIDATION_ERROR' },
+      { error: 'Invalid milestone ID format', code: 'VALIDATION_ERROR' },
       { status: 400 }
     );
   }
@@ -161,10 +140,10 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
   }
 
   try {
-    const deleted = await deleteGoal(id, user.id);
+    const deleted = await deleteMilestone(id, user.id);
     if (!deleted) {
       return NextResponse.json(
-        { error: 'Goal not found', code: 'NOT_FOUND' },
+        { error: 'Milestone not found', code: 'NOT_FOUND' },
         { status: 404 }
       );
     }
@@ -172,7 +151,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
     return new NextResponse(null, { status: 204 });
   } catch {
     return NextResponse.json(
-      { error: 'Failed to delete goal', code: 'INTERNAL_ERROR' },
+      { error: 'Failed to delete milestone', code: 'INTERNAL_ERROR' },
       { status: 500 }
     );
   }
