@@ -2,11 +2,12 @@
 stepsCompleted: [1, 2, 3, 4]
 inputDocuments:
   - product-brief-week1-2026-01-08.md
+  - research/domain-goal-setting-effectiveness-research-2026-01-16.md
 workflowType: 'prd'
 lastStep: 4
 documentCounts:
   briefs: 1
-  research: 0
+  research: 1
   projectDocs: 0
   projectContext: 0
 ---
@@ -78,7 +79,7 @@ This is a **learning project** with potential to grow. Success means:
 
 | Feature | Description |
 |---------|-------------|
-| Goal Management | Create, edit, delete 2-5 resolutions in plain text |
+| Goal Management | Create, edit, archive goals with structured data (title, type, success criteria, why it matters, implementation intention) extracted through conversation |
 | Conversational Check-ins | Natural language input for progress updates |
 | AI Coach | Claude-powered responses with context and memory |
 | User Dashboard | View goals, check-in history, and progress |
@@ -104,6 +105,141 @@ This is a **learning project** with potential to grow. Success means:
 - Advanced analytics or charts
 - Sentiment analysis visualization
 - Social features / sharing
+
+## Goal System Design
+
+> **Research Foundation:** This section is informed by domain research on goal-setting effectiveness, including Locke & Latham's goal-setting theory, implementation intentions (Gollwitzer), and competitive analysis of habit/goal tracking apps. Full research document: `_bmad-output/planning-artifacts/research/domain-goal-setting-effectiveness-research-2026-01-16.md`
+
+### The Problem We're Solving
+
+**92% of goals fail.** Research shows they fail not because people lack willpower, but because:
+
+- Goals are vague ("get healthier") instead of specific
+- Missing implementation plans (when/where/how to act)
+- Disconnected from personal values (why it matters)
+- Lacking feedback mechanisms
+- Punitive when users slip (streaks that break destroy motivation)
+
+Our conversational approach already addresses tone and guilt-free design. But we need **structured goal capture** to help users set goals that are actually achievable.
+
+### Research-Backed Goal Attributes
+
+Based on 40+ years of goal-setting research, effective goals need:
+
+| Attribute | Why It Matters | How We Capture It |
+|-----------|---------------|-------------------|
+| **Specificity** | Vague goals fail; specific goals succeed 90% more often | AI extracts specific intent from conversation |
+| **Measurability** | "How will you know you succeeded?" | Success criteria field |
+| **Implementation Intention** | "If X, then Y" bridges the intention-behavior gap | AI prompts for when/where/how during setup |
+| **Why It Matters** | Values-connected goals have higher completion | AI asks what's driving the goal |
+| **Appropriate Challenge** | Too easy = boring; too hard = discouraging | AI helps calibrate based on current baseline |
+| **Feedback Loop** | Progress visibility maintains motivation | Check-in history + progress indicators |
+| **Recovery Plan** | Pre-planned responses to setbacks prevent "what-the-hell effect" | AI helps define fallback actions |
+
+### Goal Data Model (MVP)
+
+Goals in Resolution Tracker are **not just text** — they're structured data extracted through conversation:
+
+#### Core Fields
+
+| Field | Type | Description | Example |
+|-------|------|-------------|---------|
+| `title` | string | Clear, specific goal statement | "Go to the gym 3x per week" |
+| `goal_type` | enum | Habit / Target / Project | "Habit" |
+| `success_criteria` | string | How user knows they've achieved it | "Complete 12 gym sessions this month" |
+| `target_date` | date | When goal should be achieved (optional for habits) | "2026-03-31" |
+| `status` | enum | Active / Paused / Completed / Archived | "Active" |
+
+#### Enhanced Fields (Differentiators)
+
+| Field | Type | Description | Example |
+|-------|------|-------------|---------|
+| `why_it_matters` | string | Personal motivation/values connection | "I want to have energy to play with my kids" |
+| `implementation_intention` | string | If-then plan for when/where/how | "If it's 6:30am on Mon/Wed/Fri, then I put on gym clothes and go" |
+| `current_baseline` | string | Where user is starting from | "Haven't been to gym in 3 months" |
+| `recovery_plan` | string | What to do when setbacks happen | "If I miss a session, I'll do 20 pushups at home instead" |
+
+#### Progress Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `check_in_count` | int | Number of check-ins for this goal |
+| `last_check_in` | timestamp | Most recent interaction |
+| `progress_sentiment` | enum | Behind / On Track / Ahead (AI-assessed) |
+
+### Goal Types
+
+Different goals need different tracking approaches:
+
+| Type | Use Case | Tracking Method | Example |
+|------|----------|-----------------|---------|
+| **Habit** | Regular recurring actions | Frequency / streak (non-punitive) | "Meditate daily" |
+| **Target** | Reach specific value by date | Progress toward number | "Save $1000 by June" |
+| **Project** | Multi-step achievement | Milestone completion | "Ship my side project" |
+
+**AI Behavior:** During conversational goal setup, the AI should identify the appropriate goal type and prompt for relevant fields. Users don't see "goal types" — they just talk, and the system structures it.
+
+### Conversational Goal Setup Flow
+
+Instead of forms, goals are created through dialogue:
+
+**Step 1: What** — "What do you want to work on?"
+- User describes goal in natural language
+- AI extracts title, infers goal type
+
+**Step 2: Why** — "What's driving this for you?"
+- AI prompts for motivation
+- Captures `why_it_matters`
+
+**Step 3: How** — "When and where will you make this happen?"
+- AI prompts for implementation intention
+- "If [trigger], then I will [action]"
+
+**Step 4: Measure** — "How will you know you're succeeding?"
+- AI helps define success criteria
+- Sets target date if applicable
+
+**Step 5: Recovery** — "What's your plan B when life gets in the way?"
+- AI helps define recovery plan
+- Prevents the "what-the-hell effect"
+
+> **Note:** This flow happens conversationally, not as a wizard. The AI weaves these questions naturally into dialogue, and users can skip or revisit any element.
+
+### Non-Punitive Progress Design
+
+Research shows that punitive mechanics (broken streaks, guilt notifications) cause abandonment spirals. Our design principles:
+
+| Traditional Apps | Resolution Tracker |
+|-----------------|-------------------|
+| Streak breaks = failure | Skip days without penalty |
+| "You missed 5 days!" | "Good to see you. How are you doing?" |
+| Binary success/failure | Partial credit counts |
+| Rigid schedules | Flexible check-ins |
+| Guilt-driven re-engagement | Warm, curious return |
+
+### Key Differentiators from Competitors
+
+Based on competitive analysis (Habitica, Strides, Streaks, Finch, etc.):
+
+| Gap in Market | Our Approach |
+|--------------|--------------|
+| No app captures implementation intentions | AI prompts "If X, then Y" during setup |
+| No app captures "why it matters" | AI asks what's driving the goal |
+| Most apps punish failure | Non-punitive design throughout |
+| Goal setup is forms, not conversation | Natural dialogue extracts structured data |
+| Progress is binary (done/not done) | Sentiment-aware progress assessment |
+
+### MVP Implementation Notes
+
+For MVP, the conversational goal setup should:
+
+1. **Extract structured data** from natural language (title, type, success criteria)
+2. **Prompt for key fields** (why it matters, implementation intention) without feeling like a form
+3. **Store enhanced goal model** in database (not just plain text)
+4. **Display progress context** in dashboard (last check-in, progress sentiment)
+5. **Support goal modification** (pause, reduce scope, archive) without judgment
+
+The AI coach already has context about goals — this enhancement ensures that context is **structured and actionable**, not just conversational history.
 
 ## User Journeys
 
