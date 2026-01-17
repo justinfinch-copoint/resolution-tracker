@@ -3,10 +3,12 @@ stepsCompleted: [1, 2, 3, 4, 5, 6, 7, 8]
 inputDocuments:
   - prd.md
   - product-brief-week1-2026-01-08.md
+  - research/domain-goal-setting-effectiveness-research-2026-01-16.md
 workflowType: 'architecture'
 project_name: 'Resolution Tracker'
 user_name: 'Justin'
 date: '2026-01-13'
+lastUpdated: '2026-01-17'
 status: 'complete'
 completedAt: '2026-01-13'
 ---
@@ -349,6 +351,175 @@ export async function POST(req: Request) {
 }
 ```
 
+### Decision 10: AI Coach Agent Architecture
+
+**Decision:** Single Agent with Knowledge Modules (not multi-agent)
+
+**Context:** The research on goal-setting effectiveness identified multiple specialized domains (fitness, habit psychology, planning, recovery). We considered a multi-agent architecture with specialized "Gurus" (Goal Guru, Fitness Guru, Planning Guru) orchestrated by a primary AI Coach.
+
+**Decision Rationale:**
+
+Multi-agent was rejected because:
+- **Relationship fragmentation:** The PRD's "aha moment" is feeling like talking to *someone* who knows you - singular, not a team
+- **Context handoff complexity:** Sharing memory between agents adds architectural overhead
+- **Latency and cost:** Multiple agent calls per interaction
+- **Personality consistency:** Users feel whiplash with different agent "voices"
+
+Single agent with knowledge modules provides:
+- Consistent personality and relationship continuity
+- Domain expertise when needed via dynamic context injection
+- Simpler architecture with conditional logic (no orchestration layer)
+- Lower latency and token costs
+
+**Architecture: Knowledge Module System**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Incoming User Message                     │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    Context Assembly                          │
+│                                                              │
+│  1. Identify active goal (explicit mention or most recent)   │
+│  2. Detect conversation phase                                │
+│  3. Pull goal metadata (type, why, baseline, recovery plan)  │
+│  4. Calculate engagement context (days since last check-in)  │
+│  5. Select and inject relevant knowledge modules             │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    Claude API Call                           │
+│                                                              │
+│  System: Base persona + phase module + domain module(s)      │
+│  Context: User profile + goal details + recent history       │
+│  User: Current message                                       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Hat Selection: How the Coach Knows Which Module to Use**
+
+The system uses two primary signals to select knowledge modules:
+
+**1. Goal Metadata (Primary Signal)**
+
+Goals have structured data that drives module selection:
+
+| Goal Field | Module Triggered |
+|------------|------------------|
+| `goal_type: habit` | Habit Psychology Module |
+| `goal_type: target` | Target/Planning Module |
+| `goal_type: project` | Project Breakdown Module |
+| `category: fitness` | Fitness Domain Module |
+| `category: finance` | Finance Domain Module |
+| `category: learning` | Learning Domain Module |
+
+**2. Conversation Phase Detection**
+
+| Phase | Detection Signal | Modules Activated |
+|-------|------------------|-------------------|
+| **Goal Setup** | No goal ID in context, user describing new intention | Goal Structuring, Implementation Intentions, SMART Criteria |
+| **Check-in** | User referencing existing goal | Domain module for goal category, Progress Psychology |
+| **Struggling** | Sentiment signals ("fell off", "skipped", "feel bad") | Recovery Psychology, Non-Punitive Reframing |
+| **Return After Absence** | `days_since_last_checkin > 14` | Re-engagement, Scope Reduction, Fresh Start |
+
+**Knowledge Modules**
+
+| Module | Purpose | Key Content |
+|--------|---------|-------------|
+| **Base Coach Persona** | Always included | Warm, non-judgmental tone; "better than nothing" philosophy; no guilt mechanics |
+| **Goal Setup** | New goal creation | Implementation intention prompting; "why it matters" extraction; challenge calibration; recovery plan creation |
+| **Habit Psychology** | Recurring action goals | Habit stacking; cue-routine-reward; "don't break the chain" (non-punitive); small wins compound |
+| **Fitness Domain** | Exercise-related goals | Rest and recovery importance; progressive overload basics; "some movement > no movement"; common barriers |
+| **Struggle/Recovery** | User expressing difficulty | What-the-hell effect prevention; scope reduction; "this is data, not failure" reframing; recovery plan activation |
+| **Return After Absence** | Re-engagement after gap | Warm welcome without guilt; goal modification options; fresh start framing; respect for autonomy |
+
+**Implementation: Context Builder**
+
+```typescript
+// features/ai-coach/context-builder.ts
+
+interface ContextBuilderInput {
+  user: UserProfile;
+  goal: Goal | null;
+  recentCheckIns: CheckIn[];
+  userSummary: UserSummary;
+}
+
+function buildSystemPrompt(input: ContextBuilderInput): string {
+  const { user, goal, recentCheckIns, userSummary } = input;
+
+  // Always include base persona
+  let prompt = KNOWLEDGE_MODULES.BASE_COACH_PERSONA;
+
+  // Phase detection
+  const daysSinceCheckIn = calculateDaysSince(recentCheckIns[0]?.createdAt);
+
+  if (daysSinceCheckIn > 14) {
+    prompt += KNOWLEDGE_MODULES.RETURN_AFTER_ABSENCE;
+  }
+
+  // Goal-based module selection
+  if (goal) {
+    // Domain modules based on category
+    if (goal.category === 'fitness') {
+      prompt += KNOWLEDGE_MODULES.FITNESS_DOMAIN;
+    }
+    // Add more domain modules as needed
+
+    // Goal type modules
+    if (goal.goalType === 'habit') {
+      prompt += KNOWLEDGE_MODULES.HABIT_PSYCHOLOGY;
+    }
+
+    // Inject goal-specific context
+    prompt += `\n\nUser's goal: ${goal.title}`;
+    prompt += `\nWhy it matters to them: ${goal.whyItMatters}`;
+    prompt += `\nTheir plan: ${goal.implementationIntention}`;
+    prompt += `\nRecovery plan: ${goal.recoveryPlan}`;
+  } else {
+    // No active goal = likely setting up a new one
+    prompt += KNOWLEDGE_MODULES.GOAL_SETUP;
+  }
+
+  // Add user summary for memory/continuity
+  prompt += `\n\nWhat I know about this user:\n${userSummary.summaryJson}`;
+
+  return prompt;
+}
+```
+
+**Module Content Location**
+
+```
+features/ai-coach/
+├── knowledge-modules/
+│   ├── base-persona.ts         # Core coach personality
+│   ├── goal-setup.ts           # Goal creation guidance
+│   ├── habit-psychology.ts     # Habit formation science
+│   ├── fitness-domain.ts       # Fitness-specific knowledge
+│   ├── struggle-recovery.ts    # Handling setbacks
+│   └── return-engagement.ts    # Re-engagement after absence
+├── context-builder.ts          # Assembles system prompt
+├── phase-detector.ts           # Identifies conversation phase
+├── client.ts                   # Claude API wrapper
+├── prompts.ts                  # Legacy/shared prompts
+└── types.ts
+```
+
+**Future Evolution Path**
+
+This architecture supports future enhancements without restructuring:
+
+| Enhancement | How It Fits |
+|-------------|-------------|
+| More domain modules | Add new files to `knowledge-modules/`, extend category mapping |
+| RAG-based retrieval | Replace static modules with vector search for relevant chunks |
+| Sentiment detection | Add sentiment analysis to phase detection for Struggle module |
+| Fine-tuned specialists | Could evolve to multi-agent if user research demands it |
+
+**Key Principle:** Start with simple conditionals based on data you already have. Graduate to more sophisticated routing only when complexity is justified by user needs.
+
 ## Implementation Patterns & Consistency Rules
 
 These patterns ensure all AI agents and developers produce compatible, consistent code.
@@ -567,11 +738,19 @@ resolution-tracker/
     │   │       └── ai-response.tsx
     │   │
     │   ├── ai-coach/
+    │   │   ├── knowledge-modules/    # Domain-specific knowledge (Decision 10)
+    │   │   │   ├── base-persona.ts       # Core coach personality
+    │   │   │   ├── goal-setup.ts         # Goal creation guidance
+    │   │   │   ├── habit-psychology.ts   # Habit formation science
+    │   │   │   ├── fitness-domain.ts     # Fitness-specific knowledge
+    │   │   │   ├── struggle-recovery.ts  # Handling setbacks
+    │   │   │   └── return-engagement.ts  # Re-engagement after absence
     │   │   ├── client.ts             # Claude API wrapper
     │   │   ├── client.test.ts
-    │   │   ├── context-builder.ts    # Builds prompt context
+    │   │   ├── context-builder.ts    # Builds prompt context + module selection
     │   │   ├── context-builder.test.ts
-    │   │   ├── prompts.ts            # System prompts
+    │   │   ├── phase-detector.ts     # Identifies conversation phase
+    │   │   ├── prompts.ts            # Legacy/shared prompts
     │   │   ├── summary-repository.ts
     │   │   └── types.ts
     │   │
@@ -642,8 +821,9 @@ resolution-tracker/
 
 ### Coherence Validation ✅
 
-**Decision Compatibility:** All 9 decisions work together without conflicts
+**Decision Compatibility:** All 10 decisions work together without conflicts
 - Next.js 16 + Supabase + Drizzle + Vercel AI SDK form a cohesive stack
+- AI Coach Agent Architecture (Decision 10) builds on Context Management (Decision 1) and Chat UI (Decision 9)
 - All technologies are modern, actively maintained, and well-documented
 
 **Pattern Consistency:** Implementation patterns support all architectural decisions
@@ -660,14 +840,14 @@ resolution-tracker/
 |-------------|----------------------|
 | Goal Management | `features/goals/` + API routes + Drizzle schema |
 | Conversational Check-ins | `features/check-ins/` + Vercel AI SDK `useChat` |
-| AI Coach with Memory | `features/ai-coach/` + sliding window + summary JSON |
+| AI Coach with Memory | `features/ai-coach/` + knowledge modules + sliding window + summary JSON |
 | Magic Link Auth | Supabase Auth + middleware |
 | Notion Export | `features/integrations/notion/` + OAuth |
 | Zapier Webhooks | `features/integrations/zapier/` |
 
 ### Implementation Readiness ✅
 
-**Decision Completeness:** All critical decisions documented with versions and rationale
+**Decision Completeness:** All 10 critical decisions documented with versions and rationale
 **Structure Completeness:** Full project tree with all files and directories
 **Pattern Completeness:** Naming, API, data, and test patterns defined
 
@@ -679,7 +859,7 @@ resolution-tracker/
 - [x] Technical constraints identified
 - [x] Cross-cutting concerns mapped
 
-**✅ Architectural Decisions (9 Total)**
+**✅ Architectural Decisions (10 Total)**
 - [x] AI Context Management (sliding window + summary)
 - [x] Data Model Architecture
 - [x] Project Structure (DDD + vertical slice)
@@ -689,6 +869,7 @@ resolution-tracker/
 - [x] Infrastructure & Deployment
 - [x] Local Development & Database Strategy
 - [x] Chat UI Library (Vercel AI SDK + AI Elements)
+- [x] AI Coach Agent Architecture (single agent with knowledge modules)
 
 **✅ Implementation Patterns**
 - [x] Naming conventions (DB, API, code)
@@ -745,17 +926,18 @@ When implementing this architecture, AI agents MUST:
 ### Final Architecture Deliverables
 
 **Complete Architecture Document**
-- 9 architectural decisions documented with specific versions
+- 10 architectural decisions documented with specific versions
 - Implementation patterns ensuring AI agent consistency
 - Complete project structure with all files and directories
 - Requirements to architecture mapping
 - Validation confirming coherence and completeness
 
 **Implementation Ready Foundation**
-- 9 architectural decisions made
+- 10 architectural decisions made
 - 5 implementation pattern categories defined
 - 4 feature domains specified (goals, check-ins, ai-coach, integrations)
 - All 7 PRD requirements fully supported
+- AI Coach agent architecture with knowledge modules defined
 
 ### Development Sequence
 
