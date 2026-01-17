@@ -20,6 +20,7 @@ export type ChatContext = {
     id: string;
     title: string;
     status: string;
+    goalType: 'habit' | 'target' | 'project';
   }>;
   recentCheckIns: Array<{
     id: string;

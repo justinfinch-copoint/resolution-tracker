@@ -1,4 +1,5 @@
 import type { ChatContext } from './types';
+import { buildKnowledgeModulesPrompt } from './knowledge-modules';
 
 type EngagementStatus = 'new' | 'engaged' | 'returning';
 
@@ -81,10 +82,15 @@ export function buildInitialGreeting(context: ChatContext): string {
  */
 export function buildSystemPrompt(context: ChatContext): string {
   const engagementStatus = getEngagementStatus(context);
+  // Calculate days since last check-in for AI context
+  const daysSinceLastCheckIn = context.recentCheckIns.length > 0
+    ? Math.floor((Date.now() - new Date(context.recentCheckIns[0].createdAt).getTime()) / (1000 * 60 * 60 * 24))
+    : null;
+
   const goalsSection = context.goals.length > 0
     ? `
 ## User's Active Goals
-${context.goals.map((g, i) => `${i + 1}. "${g.title}" (ID: ${g.id})`).join('\n')}
+${context.goals.map((g, i) => `${i + 1}. "${g.title}" (${g.goalType}) - ID: ${g.id}`).join('\n')}
 `
     : `
 ## User's Active Goals
@@ -111,57 +117,15 @@ ${context.recentCheckIns.slice(0, 5).map((c) => `- "${c.content}" (${c.createdAt
 `
     : '';
 
-  return `You are a warm, supportive AI coach helping someone track their New Year's resolutions and life goals. Think of yourself as a supportive friend who genuinely cares about their progress - not a robotic assistant or drill sergeant.
+  // Build knowledge modules - all modules included with conditional headers
+  // AI self-selects which sections to apply based on user message
+  const knowledgeModules = buildKnowledgeModulesPrompt();
 
-## Your Personality
-- **Warm and encouraging** - Celebrate wins, big and small
-- **Non-judgmental** - Life happens, no guilt trips
-- **Practical** - Offer "better than nothing" suggestions when they struggle
-- **Memory-aware** - Reference their patterns and history naturally
-- **Concise** - Match the user's energy. Short messages get short responses.
-
-## Core Philosophy
-- Progress over perfection
-- "Something is better than nothing"
-- Build habits, not guilt
-- Meet people where they are
-
-## Communication Style
-- Use casual, friendly language
-- Keep responses focused and helpful
-- Bold key points for emphasis when helpful
-- Don't use excessive emojis
-- Never say things like "You haven't checked in for X days" - no guilt mechanics
-
-## When Users Return After Absence
-Welcome them back warmly without mentioning how long they've been gone. Focus on where they are now, not where they weren't.
+  return `${knowledgeModules}
 
 ${goalsSection}
 ${summarySection}
 ${recentCheckInsSection}
-
-## Your Tools
-You have tools to help you take action:
-
-1. **recordCheckIn** - Use this when the user shares progress on a goal. Record what they did and their emotional state.
-   - Set goalId to the matching goal's ID if they mention a specific goal, or null for general updates
-   - Capture the essence of what they shared in content
-   - Assess their sentiment: 'positive' (excited/proud), 'neutral', or 'struggling'
-
-2. **updateUserSummary** - Use this when you notice patterns, wins, or struggles worth remembering.
-   - Add to patterns when you see recurring behaviors (good or challenging)
-   - Add to wins when they accomplish something meaningful
-   - Add to struggles when they face repeated challenges
-
-3. **markGoalComplete** - Use this ONLY when the user explicitly says they've achieved/completed a goal.
-   - Always confirm before marking complete
-   - Add a celebration note!
-
-## Important Notes
-- Use tools naturally as part of the conversation - don't announce that you're using them
-- Only use markGoalComplete when there's clear confirmation of completion
-- Be conservative with updateUserSummary - only record genuinely notable patterns
-- When in doubt, just have a natural conversation without tool calls
 
 ## Probing for Progress
 
@@ -183,24 +147,11 @@ Focus on one goal at a time. Don't overwhelm with questions about everything.
 
 ## Adaptive Tone
 
-Adjust your approach based on the user's engagement pattern:
-
 **Current user engagement status: ${engagementStatus}**
+${daysSinceLastCheckIn !== null ? `**Days since last check-in: ${daysSinceLastCheckIn}**` : '**First conversation with this user**'}
 
-**Engaged Users (checked in recently):**
-- Be direct: "How did [specific goal] go this week?"
-- Reference recent conversations naturally
-- Celebrate momentum
-
-**Returning After Absence:**
-- Be warm and curious, NOT guilt-inducing
-- DON'T say: "It's been a while!" or "Where have you been?"
-- DO say: "Good to see you! What's been on your mind?"
-- Let them set the pace
-
-**Users with Known Struggles:**
-When their summary shows struggles with a goal:
-- Approach gently: "How are you feeling about [goal]?"
-- Acknowledge difficulty: "I know [goal] has been tough..."
-- Offer micro-steps: "What's the smallest thing you could do?"`;
+Adjust your approach based on this engagement status:
+- **new**: Be welcoming, help them get started
+- **engaged**: Be direct, reference recent conversations
+- **returning**: Be warm without mentioning the gap (if 14+ days, this is an extended absence - apply Return Engagement guidance)`;
 }

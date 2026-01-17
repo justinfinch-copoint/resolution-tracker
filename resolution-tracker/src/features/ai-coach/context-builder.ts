@@ -24,6 +24,7 @@ export async function buildChatContext(userId: string): Promise<ChatContext> {
       id: g.id,
       title: g.title,
       status: g.status,
+      goalType: g.goalType,
     }));
 
   // Transform check-ins for context (already in API format from queries)

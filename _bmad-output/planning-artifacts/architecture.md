@@ -434,60 +434,47 @@ Goals have structured data that drives module selection:
 | **Struggle/Recovery** | User expressing difficulty | What-the-hell effect prevention; scope reduction; "this is data, not failure" reframing; recovery plan activation |
 | **Return After Absence** | Re-engagement after gap | Warm welcome without guilt; goal modification options; fresh start framing; respect for autonomy |
 
-**Implementation: Context Builder**
+**Implementation: All Modules with Conditional Headers (Simplified)**
+
+**Update (2026-01):** After initial implementation, we simplified from rule-based module selection to including ALL modules with conditional activation headers. The AI self-selects which sections to apply based on the user's message and provided context.
+
+**Rationale for simplification:**
+- Simpler implementation (no routing logic to maintain)
+- Zero additional latency (no classification step)
+- AI naturally handles intent detection from context
+- Token overhead (~2-3K tokens) is acceptable for the simplicity gained
+- Avoids edge cases around module switching mid-conversation
 
 ```typescript
-// features/ai-coach/context-builder.ts
+// features/ai-coach/knowledge-modules/index.ts
 
-interface ContextBuilderInput {
-  user: UserProfile;
-  goal: Goal | null;
-  recentCheckIns: CheckIn[];
-  userSummary: UserSummary;
-}
+export function buildKnowledgeModulesPrompt(): string {
+  return `${BASE_PERSONA_MODULE}
 
-function buildSystemPrompt(input: ContextBuilderInput): string {
-  const { user, goal, recentCheckIns, userSummary } = input;
+## Conditional Coaching Guidance
 
-  // Always include base persona
-  let prompt = KNOWLEDGE_MODULES.BASE_COACH_PERSONA;
+Apply the relevant section(s) below based on what the user is discussing.
 
-  // Phase detection
-  const daysSinceCheckIn = calculateDaysSince(recentCheckIns[0]?.createdAt);
+### When User Wants to CREATE or SET UP a New Goal:
+${GOAL_SETUP_MODULE}
 
-  if (daysSinceCheckIn > 14) {
-    prompt += KNOWLEDGE_MODULES.RETURN_AFTER_ABSENCE;
-  }
+### When User Has a HABIT-Type Goal and Is Discussing It:
+${HABIT_PSYCHOLOGY_MODULE}
 
-  // Goal-based module selection
-  if (goal) {
-    // Domain modules based on category
-    if (goal.category === 'fitness') {
-      prompt += KNOWLEDGE_MODULES.FITNESS_DOMAIN;
-    }
-    // Add more domain modules as needed
+### When User Expresses FRUSTRATION, FAILURE, or SETBACK:
+${STRUGGLE_RECOVERY_MODULE}
 
-    // Goal type modules
-    if (goal.goalType === 'habit') {
-      prompt += KNOWLEDGE_MODULES.HABIT_PSYCHOLOGY;
-    }
-
-    // Inject goal-specific context
-    prompt += `\n\nUser's goal: ${goal.title}`;
-    prompt += `\nWhy it matters to them: ${goal.whyItMatters}`;
-    prompt += `\nTheir plan: ${goal.implementationIntention}`;
-    prompt += `\nRecovery plan: ${goal.recoveryPlan}`;
-  } else {
-    // No active goal = likely setting up a new one
-    prompt += KNOWLEDGE_MODULES.GOAL_SETUP;
-  }
-
-  // Add user summary for memory/continuity
-  prompt += `\n\nWhat I know about this user:\n${userSummary.summaryJson}`;
-
-  return prompt;
+### When User Is RETURNING After Extended Absence (14+ days):
+${RETURN_ENGAGEMENT_MODULE}`;
 }
 ```
+
+**Context Provided to AI:**
+The system prompt includes structured data so the AI can make informed decisions:
+- Goals with goalType (habit/target/project) and IDs
+- Days since last check-in (explicit number)
+- User engagement status (new/engaged/returning)
+- Recent check-ins and user summary
 
 **Module Content Location**
 
@@ -519,6 +506,129 @@ This architecture supports future enhancements without restructuring:
 | Fine-tuned specialists | Could evolve to multi-agent if user research demands it |
 
 **Key Principle:** Start with simple conditionals based on data you already have. Graduate to more sophisticated routing only when complexity is justified by user needs.
+
+### Decision 11: Services Layer Pattern
+
+**Decision:** Extract business logic into a dedicated services layer with consistent result types
+
+**Context:** As the application grew to include AI Coach tools that need to create/modify goals, milestones, and implementation intentions, we needed a way to share business logic between API routes and AI tools without duplication.
+
+**Pattern: ServiceResult<T> Discriminated Union**
+
+```typescript
+// Consistent return type for all service functions
+export type ServiceResult<T> =
+  | { success: true; data: T }
+  | { success: false; error: { code: string; message: string } };
+
+// Example service function
+export async function createGoalService(
+  userId: string,
+  input: unknown
+): Promise<ServiceResult<Goal>> {
+  // 1. Validate input with Zod
+  const parsed = createGoalInputSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: { code: 'VALIDATION_ERROR', message: parsed.error.message },
+    };
+  }
+
+  // 2. Execute business logic
+  const [goal] = await db.insert(goals).values({...}).returning();
+
+  // 3. Return typed result
+  return { success: true, data: goal };
+}
+```
+
+**Architecture:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    API Routes                                │
+│            (Thin handlers - auth + delegation)               │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    Services Layer                            │
+│          (Business logic + validation + DB access)           │
+│                                                              │
+│  • Zod validation at boundary                                │
+│  • ServiceResult<T> return type                              │
+│  • Ownership verification                                    │
+│  • Transaction management                                    │
+└─────────────────────────────────────────────────────────────┘
+                              ↑
+┌─────────────────────────────────────────────────────────────┐
+│                    AI Coach Tools                            │
+│            (Same services, different consumer)               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Error Code Mapping:**
+
+| Service Error Code | HTTP Status | Usage |
+|-------------------|-------------|-------|
+| `VALIDATION_ERROR` | 400 | Invalid input data |
+| `NOT_FOUND` | 404 | Resource doesn't exist or not owned by user |
+| `INTERNAL_ERROR` | 500 | Database or unexpected errors |
+
+**API Route Pattern:**
+
+```typescript
+// app/api/goals/route.ts
+function errorCodeToStatus(code: string): number {
+  switch (code) {
+    case 'NOT_FOUND': return 404;
+    case 'VALIDATION_ERROR': return 400;
+    default: return 500;
+  }
+}
+
+export async function POST(request: Request) {
+  // Auth check...
+  const body = await request.json();
+
+  const result = await createGoalService(user.id, body);
+
+  if (!result.success) {
+    return NextResponse.json(
+      { error: result.error.message, code: result.error.code },
+      { status: errorCodeToStatus(result.error.code) }
+    );
+  }
+
+  return NextResponse.json(result.data, { status: 201 });
+}
+```
+
+**File Organization:**
+
+```
+features/
+├── goals/
+│   ├── services.ts        # createGoalService, updateGoalService, etc.
+│   ├── repository.ts      # Raw DB queries (optional, for complex cases)
+│   ├── types.ts           # Zod schemas + TypeScript types
+│   └── index.ts           # Re-exports services
+├── milestones/
+│   ├── services.ts
+│   └── ...
+└── implementation-intentions/
+    ├── services.ts
+    └── ...
+```
+
+**Key Benefits:**
+- **Single source of truth** for business logic
+- **Type-safe error handling** via discriminated unions
+- **Reusability** - same services power API routes and AI tools
+- **Testability** - services can be unit tested in isolation
+- **Consistency** - all consumers get the same validation and behavior
+
+**Rationale:** This pattern emerged from the need to support AI Coach tools that create and modify user data. Rather than duplicating validation and business logic between API routes and AI tools, we extract it to a services layer that both can consume.
 
 ## Implementation Patterns & Consistency Rules
 
@@ -821,7 +931,7 @@ resolution-tracker/
 
 ### Coherence Validation ✅
 
-**Decision Compatibility:** All 10 decisions work together without conflicts
+**Decision Compatibility:** All 11 decisions work together without conflicts
 - Next.js 16 + Supabase + Drizzle + Vercel AI SDK form a cohesive stack
 - AI Coach Agent Architecture (Decision 10) builds on Context Management (Decision 1) and Chat UI (Decision 9)
 - All technologies are modern, actively maintained, and well-documented
@@ -847,7 +957,7 @@ resolution-tracker/
 
 ### Implementation Readiness ✅
 
-**Decision Completeness:** All 10 critical decisions documented with versions and rationale
+**Decision Completeness:** All 11 critical decisions documented with versions and rationale
 **Structure Completeness:** Full project tree with all files and directories
 **Pattern Completeness:** Naming, API, data, and test patterns defined
 
@@ -859,7 +969,7 @@ resolution-tracker/
 - [x] Technical constraints identified
 - [x] Cross-cutting concerns mapped
 
-**✅ Architectural Decisions (10 Total)**
+**✅ Architectural Decisions (11 Total)**
 - [x] AI Context Management (sliding window + summary)
 - [x] Data Model Architecture
 - [x] Project Structure (DDD + vertical slice)
@@ -870,6 +980,7 @@ resolution-tracker/
 - [x] Local Development & Database Strategy
 - [x] Chat UI Library (Vercel AI SDK + AI Elements)
 - [x] AI Coach Agent Architecture (single agent with knowledge modules)
+- [x] Services Layer Pattern (ServiceResult<T> discriminated union)
 
 **✅ Implementation Patterns**
 - [x] Naming conventions (DB, API, code)
@@ -926,14 +1037,14 @@ When implementing this architecture, AI agents MUST:
 ### Final Architecture Deliverables
 
 **Complete Architecture Document**
-- 10 architectural decisions documented with specific versions
+- 11 architectural decisions documented with specific versions
 - Implementation patterns ensuring AI agent consistency
 - Complete project structure with all files and directories
 - Requirements to architecture mapping
 - Validation confirming coherence and completeness
 
 **Implementation Ready Foundation**
-- 10 architectural decisions made
+- 11 architectural decisions made
 - 5 implementation pattern categories defined
 - 4 feature domains specified (goals, check-ins, ai-coach, integrations)
 - All 7 PRD requirements fully supported

@@ -1,10 +1,7 @@
-import { anthropic } from '@ai-sdk/anthropic';
-import { streamText, stepCountIs, convertToModelMessages, UIMessage } from 'ai';
+import { createAgentUIStreamResponse, UIMessage } from 'ai';
 import { createClient } from '@/lib/supabase/server';
 import { buildChatContext, buildSystemPrompt, createCoachTools } from '@/src/features/ai-coach';
-
-// F9: Configurable model via env var with sensible default
-const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-20250514';
+import { createCoachAgent } from '@/src/features/ai-coach/agent';
 
 export async function POST(req: Request) {
   // 1. Auth check
@@ -45,20 +42,15 @@ export async function POST(req: Request) {
     // 4. Create tools with userId bound
     const tools = createCoachTools(user.id);
 
-    // 5. Convert UI messages to model messages (async in AI SDK v6)
-    const modelMessages = await convertToModelMessages(uiMessages);
+    // 5. Create agent with system prompt and tools
+    const agent = createCoachAgent(systemPrompt, tools);
 
-    // 6. Call streamText with anthropic provider
-    const result = streamText({
-      model: anthropic(ANTHROPIC_MODEL),
-      system: systemPrompt,
-      messages: modelMessages,
-      tools,
-      stopWhen: stepCountIs(5),
+    // 6. Stream agent response using createAgentUIStreamResponse
+    // This handles the async agent.stream() and converts to a Response
+    return createAgentUIStreamResponse({
+      agent,
+      uiMessages,
     });
-
-    // 7. Return streaming response (v6 API)
-    return result.toUIMessageStreamResponse();
   } catch (error) {
     console.error('Chat API error:', error);
     return Response.json(

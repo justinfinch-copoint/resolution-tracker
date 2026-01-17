@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getUserGoalWithRelations, canActivateGoal, transformGoalToResponse } from '@/src/features/goals/queries';
-import { updateGoal, deleteGoal, getGoalById } from '@/src/features/goals/repository';
-import { isValidUUID, updateGoalSchema } from '@/src/features/goals/types';
+import {
+  getGoalWithRelationsService,
+  updateGoalService,
+  deleteGoalService,
+} from '@/src/features/goals/services';
+import { isValidUUID } from '@/src/features/goals/types';
+import { errorCodeToStatus } from '@/src/lib/api-utils';
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -32,15 +36,14 @@ export async function GET(_request: Request, { params }: RouteParams) {
   }
 
   try {
-    const goal = await getUserGoalWithRelations(id, user.id);
-    if (!goal) {
+    const result = await getGoalWithRelationsService(id, user.id);
+    if (!result.success) {
       return NextResponse.json(
-        { error: 'Goal not found', code: 'NOT_FOUND' },
-        { status: 404 }
+        { error: result.error.message, code: result.error.code },
+        { status: errorCodeToStatus(result.error.code) }
       );
     }
-
-    return NextResponse.json(goal);
+    return NextResponse.json(result.data);
   } catch {
     return NextResponse.json(
       { error: 'Failed to fetch goal', code: 'INTERNAL_ERROR' },
@@ -84,50 +87,16 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     );
   }
 
-  // Validate with Zod schema
-  const parseResult = updateGoalSchema.safeParse(body);
-  if (!parseResult.success) {
-    const firstError = parseResult.error.issues[0];
-    return NextResponse.json(
-      { error: firstError.message, code: 'VALIDATION_ERROR' },
-      { status: 400 }
-    );
-  }
-
-  const input = parseResult.data;
-
   try {
-    // Pre-check for better UX (transaction handles atomic check)
-    if (input.status === 'active') {
-      const existingGoal = await getGoalById(id, user.id);
-      if (existingGoal && existingGoal.status !== 'active') {
-        const canActivate = await canActivateGoal(user.id);
-        if (!canActivate) {
-          return NextResponse.json(
-            { error: 'Maximum active goals reached (5)', code: 'MAX_GOALS_REACHED' },
-            { status: 400 }
-          );
-        }
-      }
-    }
-
-    const updated = await updateGoal(id, user.id, input);
-    if (!updated) {
+    const result = await updateGoalService(id, user.id, body);
+    if (!result.success) {
       return NextResponse.json(
-        { error: 'Goal not found', code: 'NOT_FOUND' },
-        { status: 404 }
+        { error: result.error.message, code: result.error.code },
+        { status: errorCodeToStatus(result.error.code) }
       );
     }
-
-    return NextResponse.json(transformGoalToResponse(updated));
-  } catch (err) {
-    // Handle MAX_GOALS_REACHED from transaction (race condition protection)
-    if (err instanceof Error && err.message === 'MAX_GOALS_REACHED') {
-      return NextResponse.json(
-        { error: 'Maximum active goals reached (5)', code: 'MAX_GOALS_REACHED' },
-        { status: 400 }
-      );
-    }
+    return NextResponse.json(result.data);
+  } catch {
     return NextResponse.json(
       { error: 'Failed to update goal', code: 'INTERNAL_ERROR' },
       { status: 500 }
@@ -161,14 +130,13 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
   }
 
   try {
-    const deleted = await deleteGoal(id, user.id);
-    if (!deleted) {
+    const result = await deleteGoalService(id, user.id);
+    if (!result.success) {
       return NextResponse.json(
-        { error: 'Goal not found', code: 'NOT_FOUND' },
-        { status: 404 }
+        { error: result.error.message, code: result.error.code },
+        { status: errorCodeToStatus(result.error.code) }
       );
     }
-
     return new NextResponse(null, { status: 204 });
   } catch {
     return NextResponse.json(

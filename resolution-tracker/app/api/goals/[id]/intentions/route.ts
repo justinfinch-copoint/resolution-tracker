@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getIntentionsForGoal, transformIntentionToResponse } from '@/src/features/implementation-intentions/queries';
-import { createIntention } from '@/src/features/implementation-intentions/repository';
-import { createIntentionSchema, isValidUUID } from '@/src/features/implementation-intentions/types';
+import { listIntentionsService, createIntentionService } from '@/src/features/implementation-intentions/services';
+import { isValidUUID } from '@/src/features/implementation-intentions/types';
+import { errorCodeToStatus } from '@/src/lib/api-utils';
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -32,15 +32,14 @@ export async function GET(_request: Request, { params }: RouteParams) {
   }
 
   try {
-    const intentions = await getIntentionsForGoal(goalId, user.id);
-    if (intentions === null) {
+    const result = await listIntentionsService(goalId, user.id);
+    if (!result.success) {
       return NextResponse.json(
-        { error: 'Goal not found', code: 'NOT_FOUND' },
-        { status: 404 }
+        { error: result.error.message, code: result.error.code },
+        { status: errorCodeToStatus(result.error.code) }
       );
     }
-
-    return NextResponse.json(intentions);
+    return NextResponse.json(result.data);
   } catch {
     return NextResponse.json(
       { error: 'Failed to fetch intentions', code: 'INTERNAL_ERROR' },
@@ -84,28 +83,15 @@ export async function POST(request: Request, { params }: RouteParams) {
     );
   }
 
-  // Validate with Zod schema
-  const parseResult = createIntentionSchema.safeParse(body);
-  if (!parseResult.success) {
-    const firstError = parseResult.error.issues[0];
-    return NextResponse.json(
-      { error: firstError.message, code: 'VALIDATION_ERROR' },
-      { status: 400 }
-    );
-  }
-
-  const input = parseResult.data;
-
   try {
-    const intention = await createIntention(goalId, user.id, input);
-    if (!intention) {
+    const result = await createIntentionService(goalId, user.id, body);
+    if (!result.success) {
       return NextResponse.json(
-        { error: 'Goal not found', code: 'NOT_FOUND' },
-        { status: 404 }
+        { error: result.error.message, code: result.error.code },
+        { status: errorCodeToStatus(result.error.code) }
       );
     }
-
-    return NextResponse.json(transformIntentionToResponse(intention), { status: 201 });
+    return NextResponse.json(result.data, { status: 201 });
   } catch {
     return NextResponse.json(
       { error: 'Failed to create intention', code: 'INTERNAL_ERROR' },

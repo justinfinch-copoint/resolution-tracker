@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getIntention, transformIntentionToResponse } from '@/src/features/implementation-intentions/queries';
-import { updateIntention, deleteIntention } from '@/src/features/implementation-intentions/repository';
-import { isValidUUID, updateIntentionSchema } from '@/src/features/implementation-intentions/types';
+import {
+  getIntentionService,
+  updateIntentionService,
+  deleteIntentionService,
+} from '@/src/features/implementation-intentions/services';
+import { isValidUUID } from '@/src/features/implementation-intentions/types';
+import { errorCodeToStatus } from '@/src/lib/api-utils';
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -32,15 +36,14 @@ export async function GET(_request: Request, { params }: RouteParams) {
   }
 
   try {
-    const intention = await getIntention(id, user.id);
-    if (!intention) {
+    const result = await getIntentionService(id, user.id);
+    if (!result.success) {
       return NextResponse.json(
-        { error: 'Intention not found', code: 'NOT_FOUND' },
-        { status: 404 }
+        { error: result.error.message, code: result.error.code },
+        { status: errorCodeToStatus(result.error.code) }
       );
     }
-
-    return NextResponse.json(intention);
+    return NextResponse.json(result.data);
   } catch {
     return NextResponse.json(
       { error: 'Failed to fetch intention', code: 'INTERNAL_ERROR' },
@@ -84,28 +87,15 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     );
   }
 
-  // Validate with Zod schema
-  const parseResult = updateIntentionSchema.safeParse(body);
-  if (!parseResult.success) {
-    const firstError = parseResult.error.issues[0];
-    return NextResponse.json(
-      { error: firstError.message, code: 'VALIDATION_ERROR' },
-      { status: 400 }
-    );
-  }
-
-  const input = parseResult.data;
-
   try {
-    const intention = await updateIntention(id, user.id, input);
-    if (!intention) {
+    const result = await updateIntentionService(id, user.id, body);
+    if (!result.success) {
       return NextResponse.json(
-        { error: 'Intention not found', code: 'NOT_FOUND' },
-        { status: 404 }
+        { error: result.error.message, code: result.error.code },
+        { status: errorCodeToStatus(result.error.code) }
       );
     }
-
-    return NextResponse.json(transformIntentionToResponse(intention));
+    return NextResponse.json(result.data);
   } catch {
     return NextResponse.json(
       { error: 'Failed to update intention', code: 'INTERNAL_ERROR' },
@@ -140,14 +130,13 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
   }
 
   try {
-    const deleted = await deleteIntention(id, user.id);
-    if (!deleted) {
+    const result = await deleteIntentionService(id, user.id);
+    if (!result.success) {
       return NextResponse.json(
-        { error: 'Intention not found', code: 'NOT_FOUND' },
-        { status: 404 }
+        { error: result.error.message, code: result.error.code },
+        { status: errorCodeToStatus(result.error.code) }
       );
     }
-
     return new NextResponse(null, { status: 204 });
   } catch {
     return NextResponse.json(

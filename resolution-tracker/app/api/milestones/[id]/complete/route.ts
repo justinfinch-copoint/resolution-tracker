@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { transformMilestoneToResponse } from '@/src/features/milestones/queries';
-import { completeMilestone } from '@/src/features/milestones/repository';
+import { completeMilestoneService } from '@/src/features/milestones/services';
 import { isValidUUID } from '@/src/features/milestones/types';
+import { errorCodeToStatus } from '@/src/lib/api-utils';
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -32,15 +32,14 @@ export async function POST(_request: Request, { params }: RouteParams) {
   }
 
   try {
-    const milestone = await completeMilestone(id, user.id);
-    if (!milestone) {
+    const result = await completeMilestoneService(id, user.id);
+    if (!result.success) {
       return NextResponse.json(
-        { error: 'Milestone not found', code: 'NOT_FOUND' },
-        { status: 404 }
+        { error: result.error.message, code: result.error.code },
+        { status: errorCodeToStatus(result.error.code) }
       );
     }
-
-    return NextResponse.json(transformMilestoneToResponse(milestone));
+    return NextResponse.json(result.data);
   } catch {
     return NextResponse.json(
       { error: 'Failed to complete milestone', code: 'INTERNAL_ERROR' },

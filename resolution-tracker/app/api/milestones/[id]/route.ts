@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getMilestone, transformMilestoneToResponse } from '@/src/features/milestones/queries';
-import { updateMilestone, deleteMilestone } from '@/src/features/milestones/repository';
-import { isValidUUID, updateMilestoneSchema } from '@/src/features/milestones/types';
+import {
+  getMilestoneService,
+  updateMilestoneService,
+  deleteMilestoneService,
+} from '@/src/features/milestones/services';
+import { isValidUUID } from '@/src/features/milestones/types';
+import { errorCodeToStatus } from '@/src/lib/api-utils';
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -32,15 +36,14 @@ export async function GET(_request: Request, { params }: RouteParams) {
   }
 
   try {
-    const milestone = await getMilestone(id, user.id);
-    if (!milestone) {
+    const result = await getMilestoneService(id, user.id);
+    if (!result.success) {
       return NextResponse.json(
-        { error: 'Milestone not found', code: 'NOT_FOUND' },
-        { status: 404 }
+        { error: result.error.message, code: result.error.code },
+        { status: errorCodeToStatus(result.error.code) }
       );
     }
-
-    return NextResponse.json(milestone);
+    return NextResponse.json(result.data);
   } catch {
     return NextResponse.json(
       { error: 'Failed to fetch milestone', code: 'INTERNAL_ERROR' },
@@ -84,28 +87,15 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     );
   }
 
-  // Validate with Zod schema
-  const parseResult = updateMilestoneSchema.safeParse(body);
-  if (!parseResult.success) {
-    const firstError = parseResult.error.issues[0];
-    return NextResponse.json(
-      { error: firstError.message, code: 'VALIDATION_ERROR' },
-      { status: 400 }
-    );
-  }
-
-  const input = parseResult.data;
-
   try {
-    const milestone = await updateMilestone(id, user.id, input);
-    if (!milestone) {
+    const result = await updateMilestoneService(id, user.id, body);
+    if (!result.success) {
       return NextResponse.json(
-        { error: 'Milestone not found', code: 'NOT_FOUND' },
-        { status: 404 }
+        { error: result.error.message, code: result.error.code },
+        { status: errorCodeToStatus(result.error.code) }
       );
     }
-
-    return NextResponse.json(transformMilestoneToResponse(milestone));
+    return NextResponse.json(result.data);
   } catch {
     return NextResponse.json(
       { error: 'Failed to update milestone', code: 'INTERNAL_ERROR' },
@@ -140,14 +130,13 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
   }
 
   try {
-    const deleted = await deleteMilestone(id, user.id);
-    if (!deleted) {
+    const result = await deleteMilestoneService(id, user.id);
+    if (!result.success) {
       return NextResponse.json(
-        { error: 'Milestone not found', code: 'NOT_FOUND' },
-        { status: 404 }
+        { error: result.error.message, code: result.error.code },
+        { status: errorCodeToStatus(result.error.code) }
       );
     }
-
     return new NextResponse(null, { status: 204 });
   } catch {
     return NextResponse.json(

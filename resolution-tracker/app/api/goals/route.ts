@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getUserGoals, canCreateGoal, transformGoalToResponse } from '@/src/features/goals/queries';
-import { createGoal } from '@/src/features/goals/repository';
-import { createGoalSchema, isValidUUID } from '@/src/features/goals/types';
+import { listGoalsService, createGoalService } from '@/src/features/goals/services';
+import { errorCodeToStatus } from '@/src/lib/api-utils';
 
 /**
  * GET /api/goals
@@ -20,8 +19,14 @@ export async function GET() {
   }
 
   try {
-    const goals = await getUserGoals(user.id);
-    return NextResponse.json(goals);
+    const result = await listGoalsService(user.id);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: result.error.message, code: result.error.code },
+        { status: errorCodeToStatus(result.error.code) }
+      );
+    }
+    return NextResponse.json(result.data);
   } catch {
     return NextResponse.json(
       { error: 'Failed to fetch goals', code: 'INTERNAL_ERROR' },
@@ -55,38 +60,16 @@ export async function POST(request: Request) {
     );
   }
 
-  // Validate with Zod schema
-  const parseResult = createGoalSchema.safeParse(body);
-  if (!parseResult.success) {
-    const firstError = parseResult.error.issues[0];
-    return NextResponse.json(
-      { error: firstError.message, code: 'VALIDATION_ERROR' },
-      { status: 400 }
-    );
-  }
-
-  const input = parseResult.data;
-
   try {
-    // Pre-check for better UX (transaction handles atomic check)
-    const canCreate = await canCreateGoal(user.id);
-    if (!canCreate) {
+    const result = await createGoalService(user.id, body);
+    if (!result.success) {
       return NextResponse.json(
-        { error: 'Maximum active goals reached (5)', code: 'MAX_GOALS_REACHED' },
-        { status: 400 }
+        { error: result.error.message, code: result.error.code },
+        { status: errorCodeToStatus(result.error.code) }
       );
     }
-
-    const goal = await createGoal(user.id, input);
-    return NextResponse.json(transformGoalToResponse(goal), { status: 201 });
-  } catch (err) {
-    // Handle MAX_GOALS_REACHED from transaction (race condition protection)
-    if (err instanceof Error && err.message === 'MAX_GOALS_REACHED') {
-      return NextResponse.json(
-        { error: 'Maximum active goals reached (5)', code: 'MAX_GOALS_REACHED' },
-        { status: 400 }
-      );
-    }
+    return NextResponse.json(result.data, { status: 201 });
+  } catch {
     return NextResponse.json(
       { error: 'Failed to create goal', code: 'INTERNAL_ERROR' },
       { status: 500 }
