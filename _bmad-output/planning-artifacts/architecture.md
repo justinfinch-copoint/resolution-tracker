@@ -8,9 +8,13 @@ workflowType: 'architecture'
 project_name: 'Resolution Tracker'
 user_name: 'Justin'
 date: '2026-01-13'
-lastUpdated: '2026-01-17'
+lastUpdated: '2026-01-19'
 status: 'complete'
 completedAt: '2026-01-13'
+revisionHistory:
+  - date: '2026-01-19'
+    change: 'Major revision: Multi-Agent Roundtable Architecture (Decision 10), Three-Tier Memory (Decision 1), updated data model and project structure'
+    reason: 'PRD evolved to embrace multi-agent team approach vs single AI coach'
 ---
 
 # Architecture Decision Document
@@ -101,15 +105,114 @@ npx create-next-app -e with-supabase resolution-tracker
 
 ### Decision 1: AI Context Management Strategy
 
-**Decision:** Sliding Window + Periodic Summary
+**Decision:** Three-Tier Memory Architecture with Scoped Context Assembly
 
-**Approach:**
-- Send last 10-15 check-ins to Claude with each request
-- Maintain a stored JSON "user summary" capturing patterns and history
-- Claude formats the summary as needed at runtime
-- Update summary periodically or on significant events
+> **Update (2026-01):** Revised from "Sliding Window + Periodic Summary" to support multi-agent architecture. Based on Google ADK context engineering patterns and research on memory engineering for multi-agent systems.
 
-**Rationale:** Balances the "knows me" conversational feel with practical token limits. Simple to implement, scales reasonably for MVP.
+**The Problem with Simple Sliding Window:**
+- Single-agent approach could dump recent history into context
+- Multi-agent requires **scoped context** — each agent needs different information
+- Context pollution degrades agent performance (Google ADK research: "context distraction")
+- Full history dump wastes tokens and introduces irrelevant information
+
+**Three-Tier Memory Architecture:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ TIER 1: WORKING CONTEXT (Ephemeral, per-invocation)             │
+│                                                                  │
+│ Assembled fresh for each AI call. Agent-specific.               │
+│ • Active agent's system prompt + personality                    │
+│ • Agent's available tools                                       │
+│ • Scoped messages (last 5-10 relevant to current task)          │
+│ • Injected expertise modules for this agent                     │
+│                                                                  │
+│ Lifecycle: Created → Used → Discarded                           │
+│ Storage: None (assembled in memory)                             │
+└─────────────────────────────────────────────────────────────────┘
+                              ↑ Pulls from
+┌─────────────────────────────────────────────────────────────────┐
+│ TIER 2: SESSION STATE (Durable for conversation session)        │
+│                                                                  │
+│ Persists for the duration of a user's session/conversation.     │
+│ • Full message history with agent attribution                   │
+│ • Agent transition log (who handed off to whom, why)            │
+│ • Current active agent                                          │
+│ • In-progress goal context (if mid-setup)                       │
+│                                                                  │
+│ Lifecycle: Session start → Session end                          │
+│ Storage: In-memory or Redis (for scaling)                       │
+└─────────────────────────────────────────────────────────────────┘
+                              ↑ Pulls from
+┌─────────────────────────────────────────────────────────────────┐
+│ TIER 3: LONG-TERM MEMORY (Persists across sessions)             │
+│                                                                  │
+│ Durable user knowledge that spans all conversations.            │
+│ • User profile (name, preferences, communication style)         │
+│ • Goals with full structured data                               │
+│ • Check-in history (retrieved via semantic search, not dumped)  │
+│ • User summary JSON (AI-consolidated patterns and insights)     │
+│ • Agent preferences (which agents user connects with)           │
+│                                                                  │
+│ Lifecycle: Account creation → Account deletion                  │
+│ Storage: Postgres (Drizzle)                                     │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Scoped Context Assembly (Key Pattern):**
+
+Each agent receives **only what it needs**, not the full history:
+
+| Agent | Working Context Includes |
+|-------|-------------------------|
+| **Coach** | User profile, active goals (summary), last 5-10 messages, user summary, days since last check-in |
+| **Goal Architect** | User profile, goal being discussed (full detail), implementation intention research, recent goal-related messages only |
+| **Pattern Analyst** | User profile, all goals (summary), check-in statistics, trend data (not raw check-ins) |
+| **Motivator** | User profile, recent achievement/struggle context, relevant goal progress |
+| **Accountability Partner** | User profile, commitments made, follow-up status, relevant goal details |
+
+**Context Assembly Implementation:**
+
+```typescript
+// features/memory/working-context.ts
+export function assembleWorkingContext(
+  agent: AgentConfig,
+  session: SessionState,
+  longTermMemory: LongTermMemory,
+): WorkingContext {
+  // Start with agent's base system prompt
+  let systemPrompt = agent.systemPrompt;
+
+  // Inject shared context (all agents get this)
+  systemPrompt += buildUserProfileContext(longTermMemory.userProfile);
+  systemPrompt += buildGoalsSummaryContext(longTermMemory.goals);
+
+  // Inject agent-specific expertise
+  for (const module of agent.expertise) {
+    systemPrompt += getExpertiseModule(module);
+  }
+
+  // Scope messages — not full history
+  const scopedMessages = selectRelevantMessages(
+    session.messages,
+    agent.id,
+    { maxMessages: 10, relevanceFilter: agent.messageFilter }
+  );
+
+  return {
+    systemPrompt,
+    messages: scopedMessages,
+    tools: agent.tools,
+  };
+}
+```
+
+**Rationale for Three-Tier:**
+- **Separation of concerns:** Each tier has clear lifecycle and storage strategy
+- **Scoped context:** Prevents context pollution identified in Google ADK research
+- **Multi-agent ready:** Different agents can pull different subsets
+- **Token efficiency:** Only relevant information enters working context
+- **Debugging:** Clear audit trail of what each agent received
 
 ### Decision 2: Data Model Architecture
 
@@ -120,14 +223,24 @@ npx create-next-app -e with-supabase resolution-tracker
 | `users` | Managed by Supabase Auth | id, email, created_at |
 | `profiles` | Links auth.users to public schema | id (matches auth.users.id), email, created_at |
 | `goals` | User's resolutions | id, user_id (FK to profiles), title, status, created_at |
-| `check_ins` | Conversation entries | id, user_id (FK to profiles), goal_id (nullable), content, ai_response, created_at |
-| `user_summaries` | AI context memory | id, user_id (FK to profiles), summary_json, updated_at |
+| `check_ins` | Conversation entries | id, user_id (FK to profiles), goal_id (nullable), content, ai_response, **agent_id**, created_at |
+| `user_summaries` | AI context memory (Tier 3) | id, user_id (FK to profiles), summary_json, updated_at |
 | `integrations` | Notion/Zapier configs | id, user_id (FK to profiles), type, access_token, config_json |
+| `conversation_sessions` | Session state (Tier 2) | id, user_id, active_agent, messages_json, transitions_json, created_at, updated_at |
+
+**Multi-Agent Additions:**
+
+| Entity | Purpose | Key Fields |
+|--------|---------|------------|
+| `conversation_sessions` | Stores session state between requests | id, user_id, active_agent (enum), messages (jsonb), agent_transitions (jsonb), expires_at |
+| `agent_transitions` | Audit log of handoffs | id, session_id, from_agent, to_agent, reason, timestamp |
 
 **Key Decisions:**
 - **Goal reference on check-ins:** Optional (supports general check-ins like "feeling motivated")
+- **Agent attribution on check-ins:** Track which agent responded (`agent_id` field)
 - **Sentiment storage:** None - derive on-demand via Claude when needed
 - **User summary format:** JSON only - Claude formats human-readable summaries at runtime
+- **Session state storage:** JSONB for flexibility; consider Redis for high-traffic scaling
 
 ### Decision 3: Project Structure (DDD + Vertical Slice)
 
@@ -351,161 +464,381 @@ export async function POST(req: Request) {
 }
 ```
 
-### Decision 10: AI Coach Agent Architecture
+### Decision 10: Multi-Agent Roundtable Architecture
 
-**Decision:** Single Agent with Knowledge Modules (not multi-agent)
+**Decision:** Coordinated team of specialized AI agents using state machine orchestration with visible handoffs
 
-**Context:** The research on goal-setting effectiveness identified multiple specialized domains (fitness, habit psychology, planning, recovery). We considered a multi-agent architecture with specialized "Gurus" (Goal Guru, Fitness Guru, Planning Guru) orchestrated by a primary AI Coach.
+**Context:** The PRD evolved to embrace a multi-agent "roundtable" model where specialized agents collaborate in a single conversation. This is a key differentiator — no goal app has a *team* working for the user. Research from Microsoft Azure AI patterns, Anthropic's agent guidelines, Google ADK context engineering, and Vercel AI SDK patterns informed this architecture.
 
-**Decision Rationale:**
+> **Research Foundation:** Microsoft Azure AI Agent Design Patterns, Anthropic Building Effective Agents, Google ADK Context Engineering, Vercel AI SDK Workflows documentation. See `_bmad-output/planning-artifacts/research/` for full analysis.
 
-Multi-agent was rejected because:
-- **Relationship fragmentation:** The PRD's "aha moment" is feeling like talking to *someone* who knows you - singular, not a team
-- **Context handoff complexity:** Sharing memory between agents adds architectural overhead
-- **Latency and cost:** Multiple agent calls per interaction
-- **Personality consistency:** Users feel whiplash with different agent "voices"
+**Why Multi-Agent (Revisited Decision):**
 
-Single agent with knowledge modules provides:
-- Consistent personality and relationship continuity
-- Domain expertise when needed via dynamic context injection
-- Simpler architecture with conditional logic (no orchestration layer)
-- Lower latency and token costs
+The original architecture rejected multi-agent due to concerns about relationship fragmentation, context complexity, and latency. The updated PRD addresses these through:
 
-**Architecture: Knowledge Module System**
+| Original Concern | How PRD Addresses It |
+|------------------|---------------------|
+| Relationship fragmentation | Single conversation thread; Coach is always "home base" |
+| Context handoff complexity | Three-tier memory architecture with scoped context |
+| Latency/cost | Handoffs are infrequent (most interactions stay with Coach) |
+| Personality whiplash | Visible handoffs set expectations; each agent has distinct, consistent voice |
+
+**The differentiator:** Users feel they have a *team* working for them, not a single bot switching hats. The "aha moment" is realizing specialized help is available when needed.
+
+**The Agent Team**
+
+| Agent | Role | Personality | When They Step In |
+|-------|------|-------------|-------------------|
+| **Coach** | Primary interface, daily check-ins, orchestrates handoffs | Supportive friend who remembers everything | Default — always "home base" |
+| **Goal Architect** | Structured goal setup, implementation intentions | Thoughtful strategist, asks clarifying questions | New goals, goal restructuring, vague intentions |
+| **Pattern Analyst** | Spots trends, weekly/monthly insights | Curious observer, presents insights without judgment | Periodic insights, "how am I doing overall?" |
+| **Motivator** | Celebrates wins, picks user up when down | Enthusiastic cheerleader, genuine not performative | Achievements, low moments, milestones |
+| **Accountability Partner** | Follows up on commitments, gentle pressure | Direct but caring, doesn't let things slide | Missed check-ins, commitment follow-through |
+
+**MVP Scope:** Implement Coach + Goal Architect first. Design system to support all 5 agents.
+
+**Architecture Pattern: State Machine with Tool-Based Handoffs**
+
+Based on research (Microsoft Handoff pattern + AI Orchestra library pattern), we use a state machine where:
+- Each agent is a "state" with its own system prompt, tools, and expertise
+- Transitions happen via tool calls (explicit handoff decisions)
+- Coach acts as the router/triage agent
+- All agents share access to the same memory layers
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Incoming User Message                     │
-└─────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────┐
-│                    Context Assembly                          │
-│                                                              │
-│  1. Identify active goal (explicit mention or most recent)   │
-│  2. Detect conversation phase                                │
-│  3. Pull goal metadata (type, why, baseline, recovery plan)  │
-│  4. Calculate engagement context (days since last check-in)  │
-│  5. Select and inject relevant knowledge modules             │
-└─────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────┐
-│                    Claude API Call                           │
-│                                                              │
-│  System: Base persona + phase module + domain module(s)      │
-│  Context: User profile + goal details + recent history       │
-│  User: Current message                                       │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         ORCHESTRATION LAYER                              │
+│                                                                          │
+│  ┌─────────────┐    State Machine    ┌─────────────────────────────┐    │
+│  │   useChat   │◄──────────────────►│     AgentOrchestrator        │    │
+│  │   (client)  │                     │                              │    │
+│  └─────────────┘                     │  • Manages active agent      │    │
+│                                      │  • Processes handoff tools   │    │
+│                                      │  • Assembles agent context   │    │
+│                                      │  • Routes to Claude API      │    │
+│                                      └─────────────────────────────┘    │
+│                                                    │                     │
+│                              ┌─────────────────────┼─────────────────┐   │
+│                              ▼                     ▼                 ▼   │
+│                    ┌──────────────┐      ┌──────────────┐    ┌──────────┐│
+│                    │    Coach     │      │Goal Architect│    │  (more)  ││
+│                    │              │      │              │    │  agents  ││
+│                    │ • Base state │      │ • Goal setup │    │          ││
+│                    │ • Handoff    │      │ • Structure  │    │          ││
+│                    │   tools      │      │ • Return to  │    │          ││
+│                    │              │      │   Coach tool │    │          ││
+│                    └──────────────┘      └──────────────┘    └──────────┘│
+└─────────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         THREE-TIER MEMORY                                │
+│                                                                          │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │ WORKING CONTEXT (Per-invocation, agent-specific)                 │    │
+│  │ • Active agent's system prompt + personality                     │    │
+│  │ • Active agent's tools                                           │    │
+│  │ • Scoped recent messages (not full history)                      │    │
+│  └─────────────────────────────────────────────────────────────────┘    │
+│                                        ▲                                 │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │ SESSION STATE (Durable for conversation)                         │    │
+│  │ • Full message history with agent attribution                    │    │
+│  │ • Agent transition log                                           │    │
+│  │ • Current active agent                                           │    │
+│  └─────────────────────────────────────────────────────────────────┘    │
+│                                        ▲                                 │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │ LONG-TERM MEMORY (Persists across sessions)                      │    │
+│  │ • User profile (name, preferences, patterns)                     │    │
+│  │ • Goals with structured data                                     │    │
+│  │ • Check-in history (retrieved via RAG, not full dump)            │    │
+│  │ • User summary JSON (consolidated patterns)                      │    │
+│  └─────────────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Hat Selection: How the Coach Knows Which Module to Use**
+**Handoff Mechanism: Tool-Based Transitions**
 
-The system uses two primary signals to select knowledge modules:
-
-**1. Goal Metadata (Primary Signal)**
-
-Goals have structured data that drives module selection:
-
-| Goal Field | Module Triggered |
-|------------|------------------|
-| `goal_type: habit` | Habit Psychology Module |
-| `goal_type: target` | Target/Planning Module |
-| `goal_type: project` | Project Breakdown Module |
-| `category: fitness` | Fitness Domain Module |
-| `category: finance` | Finance Domain Module |
-| `category: learning` | Learning Domain Module |
-
-**2. Conversation Phase Detection**
-
-| Phase | Detection Signal | Modules Activated |
-|-------|------------------|-------------------|
-| **Goal Setup** | No goal ID in context, user describing new intention | Goal Structuring, Implementation Intentions, SMART Criteria |
-| **Check-in** | User referencing existing goal | Domain module for goal category, Progress Psychology |
-| **Struggling** | Sentiment signals ("fell off", "skipped", "feel bad") | Recovery Psychology, Non-Punitive Reframing |
-| **Return After Absence** | `days_since_last_checkin > 14` | Re-engagement, Scope Reduction, Fresh Start |
-
-**Knowledge Modules**
-
-| Module | Purpose | Key Content |
-|--------|---------|-------------|
-| **Base Coach Persona** | Always included | Warm, non-judgmental tone; "better than nothing" philosophy; no guilt mechanics |
-| **Goal Setup** | New goal creation | Implementation intention prompting; "why it matters" extraction; challenge calibration; recovery plan creation |
-| **Habit Psychology** | Recurring action goals | Habit stacking; cue-routine-reward; "don't break the chain" (non-punitive); small wins compound |
-| **Fitness Domain** | Exercise-related goals | Rest and recovery importance; progressive overload basics; "some movement > no movement"; common barriers |
-| **Struggle/Recovery** | User expressing difficulty | What-the-hell effect prevention; scope reduction; "this is data, not failure" reframing; recovery plan activation |
-| **Return After Absence** | Re-engagement after gap | Warm welcome without guilt; goal modification options; fresh start framing; respect for autonomy |
-
-**Implementation: All Modules with Conditional Headers (Simplified)**
-
-**Update (2026-01):** After initial implementation, we simplified from rule-based module selection to including ALL modules with conditional activation headers. The AI self-selects which sections to apply based on the user's message and provided context.
-
-**Rationale for simplification:**
-- Simpler implementation (no routing logic to maintain)
-- Zero additional latency (no classification step)
-- AI naturally handles intent detection from context
-- Token overhead (~2-3K tokens) is acceptable for the simplicity gained
-- Avoids edge cases around module switching mid-conversation
+Agents have explicit handoff tools. When invoked, the orchestrator transitions state:
 
 ```typescript
-// features/ai-coach/knowledge-modules/index.ts
+// features/agents/coach/tools.ts
+export const coachTools = {
+  transferToGoalArchitect: tool({
+    description: 'Hand off to Goal Architect when user wants to create a new goal, restructure an existing goal, or when a goal feels vague and needs structure',
+    parameters: z.object({
+      reason: z.string().describe('Why this handoff is happening'),
+      goalContext: z.string().optional().describe('Any goal-related context to pass'),
+    }),
+    execute: async ({ reason, goalContext }) => {
+      return {
+        handoff: 'goalArchitect',
+        reason,
+        context: goalContext,
+        announcement: "Let me bring in the Goal Architect — they're great at turning intentions into concrete plans."
+      };
+    },
+  }),
 
-export function buildKnowledgeModulesPrompt(): string {
-  return `${BASE_PERSONA_MODULE}
+  transferToMotivator: tool({
+    description: 'Hand off to Motivator when user achieves something, hits a milestone, or needs encouragement after expressing low mood',
+    parameters: z.object({
+      reason: z.string(),
+      achievement: z.string().optional(),
+    }),
+    execute: async ({ reason, achievement }) => {
+      return {
+        handoff: 'motivator',
+        reason,
+        context: achievement,
+        announcement: "The Motivator wants to jump in here..."
+      };
+    },
+  }),
 
-## Conditional Coaching Guidance
+  // Pattern Analyst and Accountability Partner tools follow same pattern
+};
 
-Apply the relevant section(s) below based on what the user is discussing.
+// features/agents/goal-architect/tools.ts
+export const goalArchitectTools = {
+  returnToCoach: tool({
+    description: 'Return control to Coach when goal setup is complete or user wants general conversation',
+    parameters: z.object({
+      summary: z.string().describe('Summary of what was accomplished'),
+      goalId: z.string().optional().describe('ID of created/modified goal'),
+    }),
+    execute: async ({ summary, goalId }) => {
+      return {
+        handoff: 'coach',
+        reason: 'Goal setup complete',
+        context: summary,
+        announcement: "Great work! Handing you back to Coach."
+      };
+    },
+  }),
 
-### When User Wants to CREATE or SET UP a New Goal:
-${GOAL_SETUP_MODULE}
+  // Goal Architect also has goal creation/modification tools
+  createGoal: tool({ /* ... uses services layer */ }),
+  updateGoal: tool({ /* ... uses services layer */ }),
+};
+```
 
-### When User Has a HABIT-Type Goal and Is Discussing It:
-${HABIT_PSYCHOLOGY_MODULE}
+**Orchestrator Implementation**
 
-### When User Expresses FRUSTRATION, FAILURE, or SETBACK:
-${STRUGGLE_RECOVERY_MODULE}
+```typescript
+// features/agents/orchestrator.ts
+import { generateText, tool } from 'ai';
+import { anthropic } from '@ai-sdk/anthropic';
 
-### When User Is RETURNING After Extended Absence (14+ days):
-${RETURN_ENGAGEMENT_MODULE}`;
+type AgentId = 'coach' | 'goalArchitect' | 'patternAnalyst' | 'motivator' | 'accountabilityPartner';
+
+interface AgentState {
+  activeAgent: AgentId;
+  transitionHistory: Array<{ from: AgentId; to: AgentId; reason: string; timestamp: Date }>;
+}
+
+interface AgentConfig {
+  systemPrompt: string;
+  tools: Record<string, ReturnType<typeof tool>>;
+  expertise: string[];  // Domain knowledge modules to include
+}
+
+const agentConfigs: Record<AgentId, AgentConfig> = {
+  coach: {
+    systemPrompt: COACH_SYSTEM_PROMPT,
+    tools: { ...coachTools, ...sharedTools },
+    expertise: ['base-persona', 'check-in-support', 'return-engagement'],
+  },
+  goalArchitect: {
+    systemPrompt: GOAL_ARCHITECT_SYSTEM_PROMPT,
+    tools: { ...goalArchitectTools, ...sharedTools },
+    expertise: ['base-persona', 'goal-setup', 'implementation-intentions', 'smart-criteria'],
+  },
+  // ... other agents
+};
+
+export async function processMessage(
+  userMessage: string,
+  sessionState: AgentState,
+  memoryContext: MemoryContext,  // From three-tier memory
+): Promise<AgentResponse> {
+  const config = agentConfigs[sessionState.activeAgent];
+
+  // Assemble working context (scoped, not full history)
+  const workingContext = assembleWorkingContext(
+    config,
+    sessionState,
+    memoryContext,
+  );
+
+  const result = await generateText({
+    model: anthropic('claude-sonnet-4-20250514'),
+    system: workingContext.systemPrompt,
+    messages: workingContext.messages,
+    tools: config.tools,
+    maxSteps: 5,  // Allow multi-step tool use within single turn
+    onStepFinish: async ({ toolCalls, toolResults }) => {
+      // Detect handoff tools and update state
+      for (const result of toolResults) {
+        if (result.result?.handoff) {
+          await handleAgentTransition(sessionState, result.result);
+        }
+      }
+    },
+  });
+
+  return {
+    text: result.text,
+    activeAgent: sessionState.activeAgent,
+    toolResults: result.toolResults,
+  };
+}
+
+async function handleAgentTransition(
+  state: AgentState,
+  handoff: { handoff: AgentId; reason: string; announcement?: string },
+) {
+  state.transitionHistory.push({
+    from: state.activeAgent,
+    to: handoff.handoff,
+    reason: handoff.reason,
+    timestamp: new Date(),
+  });
+  state.activeAgent = handoff.handoff;
 }
 ```
 
-**Context Provided to AI:**
-The system prompt includes structured data so the AI can make informed decisions:
-- Goals with goalType (habit/target/project) and IDs
-- Days since last check-in (explicit number)
-- User engagement status (new/engaged/returning)
-- Recent check-ins and user summary
+**Handoff Triggers**
 
-**Module Content Location**
+| Trigger Type | Signal | Target Agent |
+|--------------|--------|--------------|
+| **Intent: New Goal** | "I want to...", "new goal", "start working on" | Goal Architect |
+| **Intent: Restructure** | "this goal isn't working", "need to change my approach" | Goal Architect |
+| **Achievement** | Goal completed, milestone hit, positive progress | Motivator |
+| **Low Mood** | Sentiment signals: "feel bad", "failed", "giving up" | Motivator |
+| **Pattern Request** | "how am I doing overall?", "any patterns?" | Pattern Analyst |
+| **Commitment Lapse** | User mentioned doing X, hasn't reported (detected by system) | Accountability Partner |
+| **Explicit Request** | "can I talk to [agent name]?" | Requested agent |
+| **Return to Coach** | Task complete, general conversation, user request | Coach |
+
+**Visible Handoff Protocol**
+
+Handoffs are **visible to the user** with natural transition language:
 
 ```
-features/ai-coach/
-├── knowledge-modules/
-│   ├── base-persona.ts         # Core coach personality
-│   ├── goal-setup.ts           # Goal creation guidance
-│   ├── habit-psychology.ts     # Habit formation science
-│   ├── fitness-domain.ts       # Fitness-specific knowledge
-│   ├── struggle-recovery.ts    # Handling setbacks
-│   └── return-engagement.ts    # Re-engagement after absence
-├── context-builder.ts          # Assembles system prompt
-├── phase-detector.ts           # Identifies conversation phase
-├── client.ts                   # Claude API wrapper
-├── prompts.ts                  # Legacy/shared prompts
-└── types.ts
+Coach: "That sounds like a goal worth pursuing. Let me bring in the
+       Goal Architect — they're great at turning intentions into
+       concrete plans."
+
+Goal Architect: "Hey! Let's make this specific. When you say 'get
+                healthier,' what does success look like to you?"
+
+[...goal setup conversation...]
+
+Goal Architect: "Perfect, you're all set with a solid plan. Handing
+                you back to Coach."
+
+Coach: "Great work with the Goal Architect. I'll check in with you
+       tomorrow to see how day one went."
 ```
 
-**Future Evolution Path**
+**Why visible handoffs:**
+- Builds trust through transparency
+- Sets expectations for different interaction styles
+- Reinforces the "team" value proposition (PRD's key differentiator)
+- Enables user agency ("Can I talk to the Accountability Partner?")
 
-This architecture supports future enhancements without restructuring:
+**Agent Personality Guidelines**
 
-| Enhancement | How It Fits |
-|-------------|-------------|
-| More domain modules | Add new files to `knowledge-modules/`, extend category mapping |
-| RAG-based retrieval | Replace static modules with vector search for relevant chunks |
-| Sentiment detection | Add sentiment analysis to phase detection for Struggle module |
-| Fine-tuned specialists | Could evolve to multi-agent if user research demands it |
+Each agent has a distinct voice while sharing core values:
 
-**Key Principle:** Start with simple conditionals based on data you already have. Graduate to more sophisticated routing only when complexity is justified by user needs.
+| Agent | Voice Characteristics | Example Phrases |
+|-------|----------------------|-----------------|
+| **Coach** | Warm, curious, supportive | "Good to see you", "How are you feeling about...", "What matters most to you right now?" |
+| **Goal Architect** | Thoughtful, clarifying, structured | "Let's make this concrete", "When specifically will you...", "What's your if-then plan?" |
+| **Pattern Analyst** | Observational, neutral, data-driven | "I've noticed...", "Looking at your check-ins...", "The data suggests..." |
+| **Motivator** | Enthusiastic, celebratory, energizing | "That's huge!", "You showed up when it was hard", "Look how far you've come" |
+| **Accountability Partner** | Direct, caring, persistent | "You mentioned you'd...", "What got in the way?", "What's one thing you can commit to?" |
+
+**Shared values across all agents:**
+- No guilt mechanics
+- "Better than nothing" philosophy
+- Respect for user autonomy
+- Non-judgmental framing
+
+**Project Structure for Multi-Agent**
+
+```
+features/
+├── agents/
+│   ├── orchestrator.ts           # State machine, routing, handoff processing
+│   ├── types.ts                  # Shared agent types
+│   ├── context-builder.ts        # Assembles working context per agent
+│   ├── shared-tools.ts           # Tools available to all agents
+│   │
+│   ├── coach/
+│   │   ├── system-prompt.ts      # Coach personality + instructions
+│   │   ├── tools.ts              # Coach-specific tools (handoffs)
+│   │   └── index.ts
+│   │
+│   ├── goal-architect/
+│   │   ├── system-prompt.ts      # Goal Architect personality
+│   │   ├── tools.ts              # Goal creation, return-to-coach
+│   │   ├── expertise/            # Domain knowledge modules
+│   │   │   ├── implementation-intentions.ts
+│   │   │   ├── smart-criteria.ts
+│   │   │   └── goal-types.ts
+│   │   └── index.ts
+│   │
+│   ├── pattern-analyst/          # Future: MVP+1
+│   │   └── ...
+│   │
+│   ├── motivator/                # Future: MVP+1
+│   │   └── ...
+│   │
+│   └── accountability-partner/   # Future: MVP+2
+│       └── ...
+│
+├── memory/                       # Three-tier memory system
+│   ├── working-context.ts        # Per-invocation context assembly
+│   ├── session-state.ts          # Conversation-level state
+│   ├── long-term/
+│   │   ├── user-profile.ts       # User preferences, patterns
+│   │   ├── user-summary.ts       # Consolidated AI summary
+│   │   └── retrieval.ts          # RAG for check-in history
+│   └── types.ts
+```
+
+**MVP Implementation Sequence**
+
+1. **Phase 1: Coach + Goal Architect**
+   - Implement orchestrator with two-agent state machine
+   - Coach handles check-ins, general conversation
+   - Goal Architect handles goal creation/modification
+   - Handoff tools for transitions
+   - Visible handoff announcements
+
+2. **Phase 2: Add Motivator**
+   - Triggered by achievements and low mood
+   - Coach learns to detect celebration/encouragement moments
+
+3. **Phase 3: Add Pattern Analyst**
+   - Requires check-in history for pattern detection
+   - Periodic insights surfaced by Coach
+
+4. **Phase 4: Add Accountability Partner**
+   - Requires commitment tracking
+   - Proactive follow-up on missed commitments
+
+**Key Architectural Principles**
+
+1. **Coach is always home base** — All conversations start with Coach; specialists return to Coach
+2. **Scoped context, not full dump** — Each agent gets minimal necessary context
+3. **Tools for transitions** — Explicit handoff decisions, not implicit switching
+4. **Visible handoffs** — Users see and understand agent transitions
+5. **Shared memory, specialized expertise** — All agents access same user data; each has domain knowledge
+6. **Design for 5, implement 2** — Architecture supports full team; MVP delivers core pair
 
 ### Decision 11: Services Layer Pattern
 
@@ -847,21 +1180,43 @@ resolution-tracker/
     │   │       ├── check-in-history.tsx
     │   │       └── ai-response.tsx
     │   │
-    │   ├── ai-coach/
-    │   │   ├── knowledge-modules/    # Domain-specific knowledge (Decision 10)
-    │   │   │   ├── base-persona.ts       # Core coach personality
-    │   │   │   ├── goal-setup.ts         # Goal creation guidance
-    │   │   │   ├── habit-psychology.ts   # Habit formation science
-    │   │   │   ├── fitness-domain.ts     # Fitness-specific knowledge
-    │   │   │   ├── struggle-recovery.ts  # Handling setbacks
-    │   │   │   └── return-engagement.ts  # Re-engagement after absence
-    │   │   ├── client.ts             # Claude API wrapper
-    │   │   ├── client.test.ts
-    │   │   ├── context-builder.ts    # Builds prompt context + module selection
-    │   │   ├── context-builder.test.ts
-    │   │   ├── phase-detector.ts     # Identifies conversation phase
-    │   │   ├── prompts.ts            # Legacy/shared prompts
-    │   │   ├── summary-repository.ts
+    │   ├── agents/                   # Multi-Agent System (Decision 10)
+    │   │   ├── orchestrator.ts           # State machine, routing, handoff processing
+    │   │   ├── orchestrator.test.ts
+    │   │   ├── types.ts                  # Shared agent types (AgentId, AgentState, etc.)
+    │   │   ├── shared-tools.ts           # Tools available to all agents
+    │   │   │
+    │   │   ├── coach/                    # Primary agent - home base
+    │   │   │   ├── system-prompt.ts      # Coach personality + instructions
+    │   │   │   ├── tools.ts              # Handoff tools (transferToGoalArchitect, etc.)
+    │   │   │   └── index.ts
+    │   │   │
+    │   │   ├── goal-architect/           # Goal setup specialist
+    │   │   │   ├── system-prompt.ts      # Goal Architect personality
+    │   │   │   ├── tools.ts              # Goal creation, returnToCoach
+    │   │   │   ├── expertise/            # Domain knowledge modules
+    │   │   │   │   ├── implementation-intentions.ts
+    │   │   │   │   ├── smart-criteria.ts
+    │   │   │   │   └── goal-types.ts
+    │   │   │   └── index.ts
+    │   │   │
+    │   │   ├── pattern-analyst/          # Future: MVP+1
+    │   │   │   └── (placeholder)
+    │   │   │
+    │   │   ├── motivator/                # Future: MVP+1
+    │   │   │   └── (placeholder)
+    │   │   │
+    │   │   └── accountability-partner/   # Future: MVP+2
+    │   │       └── (placeholder)
+    │   │
+    │   ├── memory/                   # Three-Tier Memory System (Decision 1)
+    │   │   ├── working-context.ts        # Per-invocation context assembly
+    │   │   ├── working-context.test.ts
+    │   │   ├── session-state.ts          # Conversation-level state management
+    │   │   ├── long-term/
+    │   │   │   ├── user-profile.ts       # User preferences, patterns
+    │   │   │   ├── user-summary.ts       # Consolidated AI summary
+    │   │   │   └── retrieval.ts          # RAG for check-in history (future)
     │   │   └── types.ts
     │   │
     │   └── integrations/
@@ -899,12 +1254,14 @@ resolution-tracker/
 
 | Feature | Location |
 |---------|----------|
-| **Goal Management** | `features/goals/` + `app/protected/goals/` + `app/api/goals/` |
-| **Check-ins & AI** | `features/check-ins/` + `features/ai-coach/` + `app/protected/check-in/` |
+| **Goal Management** | `features/goals/` + `app/(dashboard)/goals/` + `app/api/goals/` |
+| **Check-ins & Conversation** | `features/check-ins/` + `app/(dashboard)/check-in/` + `app/api/check-ins/` |
+| **Multi-Agent System** | `features/agents/` (orchestrator, coach, goal-architect, etc.) |
+| **Memory System** | `features/memory/` (working-context, session-state, long-term/) |
 | **Notion Integration** | `features/integrations/notion/` + `app/api/integrations/notion/` |
 | **Zapier Webhooks** | `features/integrations/zapier/` + `app/api/integrations/zapier/` |
-| **Auth** | `app/auth/` + `lib/supabase/proxy.ts` |
-| **Database** | `db/schema.ts` + `drizzle/migrations/` + `profiles` table |
+| **Auth** | `app/(auth)/` + `middleware.ts` |
+| **Database** | `db/schema.ts` + `drizzle/migrations/` |
 
 ### Architectural Boundaries
 
@@ -933,16 +1290,19 @@ resolution-tracker/
 
 **Decision Compatibility:** All 11 decisions work together without conflicts
 - Next.js 16 + Supabase + Drizzle + Vercel AI SDK form a cohesive stack
-- AI Coach Agent Architecture (Decision 10) builds on Context Management (Decision 1) and Chat UI (Decision 9)
+- Multi-Agent Roundtable Architecture (Decision 10) builds on Three-Tier Memory (Decision 1) and Chat UI (Decision 9)
+- State machine orchestration integrates cleanly with Vercel AI SDK's tool-based patterns
 - All technologies are modern, actively maintained, and well-documented
 
 **Pattern Consistency:** Implementation patterns support all architectural decisions
 - Naming conventions align with Next.js and Drizzle conventions
 - API patterns work with Vercel AI SDK streaming
+- Agent handoff tools follow established tool patterns
 
 **Structure Alignment:** Project structure supports all decisions
 - Vertical slice architecture accommodates all features
 - Clear boundaries between layers
+- `features/agents/` and `features/memory/` provide clear homes for multi-agent code
 
 ### Requirements Coverage ✅
 
@@ -950,7 +1310,8 @@ resolution-tracker/
 |-------------|----------------------|
 | Goal Management | `features/goals/` + API routes + Drizzle schema |
 | Conversational Check-ins | `features/check-ins/` + Vercel AI SDK `useChat` |
-| AI Coach with Memory | `features/ai-coach/` + knowledge modules + sliding window + summary JSON |
+| AI Agent Team with Memory | `features/agents/` (orchestrator, coach, goal-architect) + `features/memory/` (three-tier) |
+| Visible Agent Handoffs | Tool-based transitions with announcement messages |
 | Magic Link Auth | Supabase Auth + middleware |
 | Notion Export | `features/integrations/notion/` + OAuth |
 | Zapier Webhooks | `features/integrations/zapier/` |
@@ -960,6 +1321,7 @@ resolution-tracker/
 **Decision Completeness:** All 11 critical decisions documented with versions and rationale
 **Structure Completeness:** Full project tree with all files and directories
 **Pattern Completeness:** Naming, API, data, and test patterns defined
+**Multi-Agent Ready:** State machine, handoff protocol, and memory architecture defined
 
 ### Architecture Completeness Checklist
 
@@ -970,8 +1332,8 @@ resolution-tracker/
 - [x] Cross-cutting concerns mapped
 
 **✅ Architectural Decisions (11 Total)**
-- [x] AI Context Management (sliding window + summary)
-- [x] Data Model Architecture
+- [x] AI Context Management (three-tier memory architecture)
+- [x] Data Model Architecture (with session state for multi-agent)
 - [x] Project Structure (DDD + vertical slice)
 - [x] Authentication (Supabase magic links)
 - [x] Integration Architecture (Notion OAuth, Zapier webhooks)
@@ -979,7 +1341,7 @@ resolution-tracker/
 - [x] Infrastructure & Deployment
 - [x] Local Development & Database Strategy
 - [x] Chat UI Library (Vercel AI SDK + AI Elements)
-- [x] AI Coach Agent Architecture (single agent with knowledge modules)
+- [x] Multi-Agent Roundtable Architecture (state machine + tool-based handoffs)
 - [x] Services Layer Pattern (ServiceResult<T> discriminated union)
 
 **✅ Implementation Patterns**
@@ -988,11 +1350,14 @@ resolution-tracker/
 - [x] Data format patterns
 - [x] Test organization (co-located)
 - [x] Loading & error UI patterns
+- [x] Agent handoff protocol (visible transitions)
+- [x] Scoped context assembly per agent
 
 **✅ Project Structure**
 - [x] Complete directory tree
 - [x] Feature boundaries defined
 - [x] Requirements mapped to structure
+- [x] Multi-agent folder structure defined
 
 ### Architecture Readiness Assessment
 
@@ -1002,10 +1367,19 @@ resolution-tracker/
 
 **Key Strengths:**
 - Clean separation of concerns with vertical slice architecture
-- Simple, proven tech stack (boring technology that works)
+- Enterprise-grade multi-agent orchestration with state machine pattern
+- Three-tier memory prevents context pollution (research-backed)
+- Visible handoffs build user trust and enable agent identity
 - Vercel AI SDK handles chat complexity (streaming, state, UI)
+- Design for 5 agents, implement 2 for MVP (scalable approach)
 - Clear patterns prevent AI agent conflicts
 - Local development environment ready with Postgres container
+
+**Research Foundation:**
+- Microsoft Azure AI Agent Design Patterns (Handoff pattern)
+- Anthropic Building Effective Agents (tool-based orchestration)
+- Google ADK Context Engineering (three-tier memory)
+- Vercel AI SDK Workflows documentation
 
 **First Implementation Steps:**
 ```bash
@@ -1024,20 +1398,26 @@ When implementing this architecture, AI agents MUST:
 5. Generate migrations for any schema changes (never use push)
 6. Co-locate tests with source files
 7. Use the standard API response format
+8. Implement agent tools with proper handoff return types
+9. Use scoped context assembly (not full history dump)
+10. Include visible handoff announcements in agent transitions
 
 ## Architecture Completion Summary
 
 ### Workflow Completion
 
-**Architecture Decision Workflow:** COMPLETED ✅
-**Total Steps Completed:** 8
+**Architecture Decision Workflow:** UPDATED ✅
+**Total Steps Completed:** 8 (original) + multi-agent revision
 **Date Completed:** 2026-01-13
+**Last Updated:** 2026-01-19 (Multi-Agent Roundtable Architecture)
 **Document Location:** `_bmad-output/planning-artifacts/architecture.md`
 
 ### Final Architecture Deliverables
 
 **Complete Architecture Document**
 - 11 architectural decisions documented with specific versions
+- Multi-agent roundtable architecture with state machine orchestration
+- Three-tier memory system with scoped context assembly
 - Implementation patterns ensuring AI agent consistency
 - Complete project structure with all files and directories
 - Requirements to architecture mapping
@@ -1046,17 +1426,23 @@ When implementing this architecture, AI agents MUST:
 **Implementation Ready Foundation**
 - 11 architectural decisions made
 - 5 implementation pattern categories defined
-- 4 feature domains specified (goals, check-ins, ai-coach, integrations)
-- All 7 PRD requirements fully supported
-- AI Coach agent architecture with knowledge modules defined
+- 5 feature domains specified (goals, check-ins, agents, memory, integrations)
+- All PRD requirements fully supported including agent team
+- Multi-agent architecture with handoff protocol defined
+- MVP scope: Coach + Goal Architect (extensible to 5 agents)
 
 ### Development Sequence
 
 1. Initialize project: `npx create-next-app -e with-supabase resolution-tracker`
 2. Install dependencies: `npm install ai @ai-sdk/anthropic drizzle-orm drizzle-kit`
-3. Set up Drizzle schema and generate initial migration
+3. Set up Drizzle schema and generate initial migration (include session state table)
 4. Configure environment variables
-5. Implement features following architectural patterns
+5. Implement `features/memory/` (three-tier memory system)
+6. Implement `features/agents/orchestrator.ts` (state machine)
+7. Implement Coach agent (`features/agents/coach/`)
+8. Implement Goal Architect agent (`features/agents/goal-architect/`)
+9. Wire up to `useChat` and API routes
+10. Add remaining agents incrementally (Motivator, Pattern Analyst, Accountability Partner)
 
 ---
 

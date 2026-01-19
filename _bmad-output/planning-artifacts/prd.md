@@ -19,16 +19,17 @@ documentCounts:
 
 ## Executive Summary
 
-Resolution Tracker is an AI-powered conversational coach that helps users set, monitor, and achieve their yearly goals. Unlike traditional goal-tracking apps that act as passive checkbox lists, Resolution Tracker maintains context about who you are, remembers your history and patterns, and engages you in natural dialogue — solving the "February problem" where motivation fades and resolutions are forgotten.
+Resolution Tracker is an AI-powered goal achievement platform where a coordinated team of specialized AI agents helps users set, monitor, and achieve their yearly goals. Unlike traditional goal-tracking apps that act as passive checkbox lists, Resolution Tracker maintains context about who you are, remembers your history and patterns, and engages you in natural dialogue — solving the "February problem" where motivation fades and resolutions are forgotten.
 
-The core insight is simple: people don't fail at goals because they lack willpower. They fail because their tools are passive task managers pretending to be coaches. Resolution Tracker flips this by being proactive, contextual, and conversational.
+The core insight is simple: people don't fail at goals because they lack willpower. They fail because their tools are passive task managers pretending to be coaches. Resolution Tracker flips this with a team of AI agents — a Coach who knows your story, a Goal Architect who structures your intentions, a Pattern Analyst who spots trends, a Motivator who celebrates wins, and an Accountability Partner who asks the hard questions — all working together in a single conversation.
 
 ### What Makes This Special
 
+- **Agent team, not solo coach**: A coordinated team of specialized AI agents — Coach, Goal Architect, Pattern Analyst, Motivator, Accountability Partner — each excellent at their role, working together in one conversation
 - **Conversational-first**: Users talk to it like a friend ("went to the gym, felt great") rather than filling out forms or checking boxes
-- **Memory & context**: The system actually knows your story — your patterns, struggles, wins, and history — not just your task list
-- **Proactive engagement**: It reaches out, notices patterns, and prevents drift before goals slip away
-- **Sentiment-aware**: Understands how you're feeling, adapting tone based on what you need (encouragement vs. accountability)
+- **Memory & context**: The team actually knows your story — your patterns, struggles, wins, and history — not just your task list
+- **Proactive engagement**: Agents notice patterns and surface insights, preventing drift before goals slip away
+- **Sentiment-aware**: Understands how you're feeling, with the right agent stepping in based on what you need (encouragement from Motivator vs. accountability from the Partner)
 
 ## Project Classification
 
@@ -49,7 +50,7 @@ Built on Next.js with Supabase (Postgres + Auth) and Claude API for the conversa
 | 30-day retention | User still active after 30 days | Beat the "February problem" |
 | Goal completion rate | At least 1 goal achieved per user | Product delivers real outcomes |
 
-**The "Aha" Moment:** When the AI responds with real context — remembering a user's patterns, struggles, or history — and it feels like talking to someone who actually knows them.
+**The "Aha" Moment:** When an agent responds with real context — remembering a user's patterns, struggles, or history — and it feels like talking to a team that actually knows them. Or when the Coach seamlessly brings in the Goal Architect, and the user realizes they have a whole team working for them.
 
 ### Business Success
 
@@ -62,7 +63,8 @@ This is a **learning project** with potential to grow. Success means:
 ### Technical Success
 
 - Conversational interface that feels natural, not robotic
-- AI responses that demonstrate memory and context awareness
+- AI agent team with seamless handoffs and shared memory
+- Agent responses that demonstrate context awareness and specialized expertise
 - Reliable auth flow (passwordless magic links)
 - Clean integration patterns for Notion export and Zapier webhooks
 
@@ -70,7 +72,7 @@ This is a **learning project** with potential to grow. Success means:
 
 | Timeframe | Outcome |
 |-----------|---------|
-| MVP Launch | Core goal tracking + conversational check-ins + AI coach + integrations working end-to-end |
+| MVP Launch | Core goal tracking + conversational check-ins + AI agent team (Coach + Goal Architect minimum) + integrations working end-to-end |
 | 30 days post-launch | Developer actively using it for personal goals |
 
 ## Product Scope
@@ -81,7 +83,7 @@ This is a **learning project** with potential to grow. Success means:
 |---------|-------------|
 | Goal Management | Create, edit, archive goals with structured data (title, type, success criteria, why it matters, implementation intention) extracted through conversation |
 | Conversational Check-ins | Natural language input for progress updates |
-| AI Coach | Claude-powered responses with context and memory |
+| AI Agent Team | Coordinated team of specialized agents (Coach, Goal Architect, Pattern Analyst, Motivator, Accountability Partner) with shared memory |
 | User Dashboard | View goals, check-in history, and progress |
 | Multi-user Auth | Passwordless via Supabase Auth (magic links) |
 | Notion Export | Sync goals and progress to a Notion database (OAuth flow) |
@@ -177,33 +179,33 @@ Different goals need different tracking approaches:
 | **Target** | Reach specific value by date | Progress toward number | "Save $1000 by June" |
 | **Project** | Multi-step achievement | Milestone completion | "Ship my side project" |
 
-**AI Behavior:** During conversational goal setup, the AI should identify the appropriate goal type and prompt for relevant fields. Users don't see "goal types" — they just talk, and the system structures it.
+**Goal Architect Behavior:** During conversational goal setup, the Goal Architect identifies the appropriate goal type and prompts for relevant fields. Users don't see "goal types" — they just talk, and the Goal Architect structures it.
 
 ### Conversational Goal Setup Flow
 
-Instead of forms, goals are created through dialogue:
+Instead of forms, goals are created through dialogue with the Goal Architect:
 
 **Step 1: What** — "What do you want to work on?"
 - User describes goal in natural language
-- AI extracts title, infers goal type
+- Goal Architect extracts title, infers goal type
 
 **Step 2: Why** — "What's driving this for you?"
-- AI prompts for motivation
+- Goal Architect prompts for motivation
 - Captures `why_it_matters`
 
 **Step 3: How** — "When and where will you make this happen?"
-- AI prompts for implementation intention
+- Goal Architect prompts for implementation intention
 - "If [trigger], then I will [action]"
 
 **Step 4: Measure** — "How will you know you're succeeding?"
-- AI helps define success criteria
+- Goal Architect helps define success criteria
 - Sets target date if applicable
 
 **Step 5: Recovery** — "What's your plan B when life gets in the way?"
-- AI helps define recovery plan
+- Goal Architect helps define recovery plan
 - Prevents the "what-the-hell effect"
 
-> **Note:** This flow happens conversationally, not as a wizard. The AI weaves these questions naturally into dialogue, and users can skip or revisit any element.
+> **Note:** This flow happens conversationally, not as a wizard. The Goal Architect weaves these questions naturally into dialogue, and users can skip or revisit any element. Coach hands off to Goal Architect when a new goal is being created, and Goal Architect returns to Coach when setup is complete.
 
 ### Non-Punitive Progress Design
 
@@ -239,7 +241,115 @@ For MVP, the conversational goal setup should:
 4. **Display progress context** in dashboard (last check-in, progress sentiment)
 5. **Support goal modification** (pause, reduce scope, archive) without judgment
 
-The AI coach already has context about goals — this enhancement ensures that context is **structured and actionable**, not just conversational history.
+The AI agent team already has context about goals — this enhancement ensures that context is **structured and actionable**, not just conversational history. The Goal Architect specializes in this structured extraction, while all agents benefit from the resulting goal data.
+
+## AI Agent Team Architecture
+
+> **Research Foundation:** This architecture is informed by industry best practices on multi-agent AI systems, including Google's ADK context engineering principles, memory engineering patterns from MongoDB's research, and Microsoft's multi-agent intelligence design guidance. Key sources: [Google Developers Blog](https://developers.googleblog.com/architecting-efficient-context-aware-multi-agent-framework-for-production/), [MongoDB Memory Engineering](https://www.mongodb.com/company/blog/technical/why-multi-agent-systems-need-memory-engineering), [Microsoft Multi-Agent Design](https://developer.microsoft.com/blog/designing-multi-agent-intelligence).
+
+### The Problem with a Single AI Coach
+
+A single AI agent trying to handle everything — goal setup, daily check-ins, pattern analysis, motivation, accountability — faces fundamental limitations:
+
+- **Context overload**: One agent can't hold deep expertise in goal science AND motivational psychology AND behavioral pattern analysis while also maintaining conversational warmth
+- **Jack of all trades**: The agent becomes mediocre at everything instead of excellent at anything
+- **Muddled personality**: Switching between cheerleader, analyst, and accountability partner in the same breath feels inconsistent
+
+### The Solution: A Coordinated Agent Team
+
+Resolution Tracker uses a **round table model** — a team of specialized AI agents working together in a single conversation, with the Coach as facilitator and home base. Users talk to one interface, but specialized agents step in when their expertise is needed.
+
+**This is differentiated.** No goal app does this. Habitica has gamification, Finch has a pet, but nobody has a *team* working for you.
+
+### The Team
+
+| Agent | Role | Personality | When They Step In |
+|-------|------|-------------|-------------------|
+| **Coach** | Primary interface, daily check-ins, warm presence, orchestrates handoffs | Supportive friend who remembers everything | Default — always "home base" |
+| **Goal Architect** | Structured goal setup, implementation intentions, goal refinement | Thoughtful strategist, asks clarifying questions | New goals, goal restructuring, when goals feel vague |
+| **Pattern Analyst** | Spots trends, weekly/monthly insights, data-driven observations | Curious observer, presents insights without judgment | Periodic insights, when user asks "how am I doing overall?" |
+| **Motivator** | Celebrates wins, picks user up when down, energy and encouragement | Enthusiastic cheerleader, genuine not performative | Achievements, low moments, milestones |
+| **Accountability Partner** | Follows up on commitments, gentle pressure, asks the hard questions | Direct but caring, doesn't let things slide | Missed check-ins, commitment follow-through |
+
+### User Experience Principles
+
+**Single chat thread** — All agents appear in the same conversation. No context switching, no separate chat windows. The user talks to Resolution Tracker; agents are the personalities behind it.
+
+**Coach is home base** — Every conversation starts with Coach. User can always say "back to Coach" or similar to return. Coach is the "primary care physician" who coordinates the team.
+
+**Seamless handoffs** — Coach introduces specialists naturally:
+- *"Let me bring in the Goal Architect to help structure this..."*
+- *"The Pattern Analyst noticed something interesting about your check-ins..."*
+- *"I think the Motivator wants to say something about what you just accomplished..."*
+
+**Agent identity** — Each agent has a distinct voice and personality, but all share knowledge of the user. Alex shouldn't have to re-explain his situation to each agent.
+
+**User control** — Users can request specific agents ("can I talk to the Accountability Partner?") or return to Coach anytime. They cannot "fire" agents, but they can express preferences that Coach will remember.
+
+### Memory Architecture
+
+The team shares a common understanding of the user while maintaining specialized expertise:
+
+| Memory Layer | What It Contains | Who Accesses |
+|--------------|------------------|--------------|
+| **User Profile** | Name, preferences, communication style, key life context | All agents |
+| **Goal State** | Current goals, status, implementation intentions, why it matters, recovery plans | All agents |
+| **Check-in History** | Past conversations, progress notes, sentiment trends | All agents (retrieved on-demand via RAG, not all in context) |
+| **Agent Expertise** | Domain knowledge — goal science, psychology, motivation patterns, behavioral analysis | Specific to each agent |
+
+**Design Principles (from research):**
+
+- **Avoid context dumping** — Don't give every agent everything. Each agent pulls only what's needed for the current turn.
+- **Two-tier memory** — Shared memory (user profile, goals) + private memory (agent-specific expertise and working context)
+- **Memory consolidation** — When new information arrives, intelligently merge with existing context rather than just appending
+- **Structured handoffs** — Agents communicate via structured data, not free-form text, to prevent context pollution
+
+### Example Interaction Flow
+
+```
+User: "I want to start meditating but I don't know where to begin"
+
+Coach: "That's a great intention. Let me bring in the Goal Architect —
+they're really good at helping turn 'I want to' into 'here's exactly how.'"
+
+Goal Architect: "Hey! Meditation is one of those goals that sounds simple
+but trips people up because it's vague. Let's make it concrete.
+When you picture yourself meditating successfully, what does that look like?
+5 minutes in the morning? 20 minutes before bed? Guided or silent?"
+
+User: "Maybe 10 minutes in the morning? I've tried apps before but never stuck with it"
+
+Goal Architect: "10 minutes, morning. Good. Now the key question: what's your
+trigger going to be? The most successful meditators attach it to something
+they already do. What's your morning routine look like?"
+
+[...conversation continues, goal gets structured...]
+
+Goal Architect: "Alright, you're set up. I'm handing you back to Coach —
+they'll check in with you tomorrow to see how the first session went."
+
+Coach: "Thanks, Goal Architect. Okay Alex, you've got a plan: 10 minutes
+right after your coffee, using Headspace. I'll ask you about it tomorrow.
+Anything else on your mind?"
+```
+
+### MVP Implementation Notes
+
+For MVP, the agent team should:
+
+1. **Implement Coach + Goal Architect first** — These cover the critical paths (check-ins and goal setup)
+2. **Add Pattern Analyst and Motivator in iteration** — Once check-in data exists
+3. **Accountability Partner last** — Requires enough history to follow up on
+4. **Build shared memory layer** — User profile and goal state accessible to all agents
+5. **Design handoff protocol** — How Coach introduces agents, how agents return to Coach
+6. **Maintain single conversation thread** — All agents write to the same chat history
+
+### Future Enhancements
+
+- **Agent preferences** — User can indicate which agents they connect with most
+- **Proactive agent suggestions** — Agents can request to step in ("Pattern Analyst has an insight...")
+- **Custom agent personalities** — User can adjust tone (more direct, more gentle, etc.)
+- **Agent memory of past interactions** — "Last time we worked on a goal together, you mentioned..."
 
 ## User Journeys
 
@@ -247,21 +357,25 @@ The AI coach already has context about goals — this enhancement ensures that c
 
 Alex is a senior developer at a fintech startup. It's January 3rd, 11pm. He just saw a tweet about an AI goal tracker and clicked through, still riding the New Year momentum but carrying a familiar knot of guilt — he's been meaning to get back to the gym since October, and his Spanish learning app has sent 47 unopened reminder notifications.
 
-He signs up with a magic link (no password to forget), and instead of a form with dropdowns, Resolution Tracker just asks: *"What do you want to work on this year?"*
+He signs up with a magic link (no password to forget), and the Coach greets him: *"Hey Alex. I'm your Coach — I'll be your main point of contact here. What do you want to work on this year?"*
 
 Alex types: "Get back to the gym 3x a week. Actually stick with it this time."
 
-The AI responds warmly — not with a generic "Great goal!" but with: *"Getting back to something you care about. What's been getting in the way?"*
+The Coach responds warmly: *"Getting back to something you care about. Let me bring in the Goal Architect — they're great at turning good intentions into plans that actually stick."*
+
+The Goal Architect steps in: *"Hey Alex. 'Get back to the gym' — I hear that a lot. What's been getting in the way?"*
 
 He pauses. Types: "Work gets crazy. By evening I'm too drained to go."
 
 *"Morning workouts? Or is that asking too much of pre-coffee Alex?"*
 
-He laughs. Adds two more goals in plain language — learning Spanish and shipping his side project. Five minutes in, he has three goals set up, and the AI already feels like it *gets* him.
+He laughs. The Goal Architect walks him through implementation intentions for the gym goal, then does the same for learning Spanish and shipping his side project. Five minutes in, he has three structured goals, and the team already feels like they *get* him.
 
-The aha moment: when he finishes onboarding and the AI says, *"Alright Alex, three goals, no pressure to be perfect. Check in whenever — I'll be here. What matters is we keep talking."*
+The Goal Architect wraps up: *"Alright, you're set. I'm handing you back to Coach."*
 
-No streak counters. No guilt mechanics. Just... a conversation waiting to continue.
+The Coach returns: *"Three goals, no pressure to be perfect. Check in whenever — I'll be here. The whole team will be. What matters is we keep talking."*
+
+No streak counters. No guilt mechanics. Just... a team waiting to help.
 
 ---
 
@@ -271,7 +385,7 @@ It's Tuesday, 9:47pm. Alex is on the couch, laptop closed, doom-scrolling. The g
 
 He opens Resolution Tracker and types: "skipped gym. production fire. feel like crap about it."
 
-The AI doesn't flinch: *"Production fires happen. You didn't skip because you didn't care — you skipped because work needed you. That's not failure, that's life."*
+The Coach doesn't flinch: *"Production fires happen. You didn't skip because you didn't care — you skipped because work needed you. That's not failure, that's life."*
 
 Then the nudge: *"You're not getting to the gym tonight. But what about 3 sets of 10 pushups before bed? Not the goal. Not perfection. Just... better than nothing."*
 
@@ -279,7 +393,9 @@ Alex almost rolls his eyes — but then actually does the pushups. Thirty reps. 
 
 He checks back in: "did the pushups. felt dumb but also kind of good?"
 
-*"30 more pushups than yesterday. That's not dumb, that's momentum. See you tomorrow, Alex."*
+The Motivator jumps in: *"30 more pushups than yesterday! That's not dumb — that's momentum. You showed up when it would've been easier not to. That counts."*
+
+The Coach adds: *"See you tomorrow, Alex."*
 
 The next morning, he makes it to the gym.
 
@@ -313,7 +429,7 @@ The app hasn't sent a single notification. No passive-aggressive "We miss you!" 
 
 One night, Alex is cleaning up his phone's home screen. He sees the Resolution Tracker icon and almost moves it to the junk folder. But something makes him tap it instead.
 
-The AI doesn't guilt him. Doesn't mention the 17 days. Just:
+The Coach doesn't guilt him. Doesn't mention the 17 days. Just:
 
 *"Hey Alex. Good to see you. How are you doing?"*
 
@@ -325,9 +441,11 @@ Then: *"You're here now. That's what matters. Want to pick up where you left off
 
 Alex thinks. Types: "smaller. just the gym. forget the rest for now."
 
-*"Done. One goal: gym. No pressure on the others — they'll be here if you want them back. What's one small thing you could do this week?"*
+*"Done. One goal: gym. I'll pause the others — they'll be here if you want them back. What's one small thing you could do this week?"*
 
 He commits to two gym sessions. Not three. Two.
+
+The Motivator chimes in gently: *"Two sessions is a win. You're back. That's what matters."*
 
 A week later, he's checked in four times. The momentum is back — on his terms.
 
@@ -337,14 +455,15 @@ A week later, he's checked in four times. The momentum is back — on his terms.
 
 | Journey | Capabilities Revealed |
 |---------|----------------------|
-| Fresh Start (Onboarding) | Magic link auth, conversational goal setup, AI personality/tone, no-guilt framing |
-| Mixed Day (Check-ins) | Natural language input, context-aware AI responses, "better than nothing" micro-suggestions, memory of goals |
+| Fresh Start (Onboarding) | Magic link auth, Coach greeting, Goal Architect handoff, conversational goal setup, agent personality/tone, no-guilt framing |
+| Mixed Day (Check-ins) | Natural language input, Coach context-aware responses, "better than nothing" micro-suggestions, Motivator celebration, memory of goals |
 | Sunday Tinkering (Integrations) | Notion OAuth flow, database picker, auto-sync on check-in, Zapier webhook URL, event triggers |
-| Quiet Return (Re-engagement) | Warm re-entry without guilt, goal modification (reduce/pause), fresh start option, respect for user autonomy |
+| Quiet Return (Re-engagement) | Coach warm re-entry without guilt, goal modification (reduce/pause), Motivator gentle encouragement, respect for user autonomy |
 
 ### Core Product Philosophy (from Journeys)
 
-- **User is the driver** — AI is a supportive co-pilot, always available, never nagging
+- **User is the driver** — The agent team is a supportive crew, always available, never nagging
 - **No guilt mechanics** — no streaks, no "you missed X days", no passive-aggressive notifications
 - **Better than nothing** — small actions beat zero actions; progress over perfection
 - **Accountability through encouragement** — self-driven accountability, not surveillance
+- **Right agent, right moment** — Coach for daily presence, Goal Architect for structure, Motivator for wins, Accountability Partner for follow-through
