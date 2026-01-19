@@ -174,7 +174,7 @@ Each agent receives **only what it needs**, not the full history:
 **Context Assembly Implementation:**
 
 ```typescript
-// features/memory/working-context.ts
+// features/agents/memory/working-context.ts
 export function assembleWorkingContext(
   agent: AgentConfig,
   session: SessionState,
@@ -771,43 +771,45 @@ Each agent has a distinct voice while sharing core values:
 
 ```
 features/
-├── agents/
-│   ├── orchestrator.ts           # State machine, routing, handoff processing
-│   ├── types.ts                  # Shared agent types
-│   ├── context-builder.ts        # Assembles working context per agent
-│   ├── shared-tools.ts           # Tools available to all agents
-│   │
-│   ├── coach/
-│   │   ├── system-prompt.ts      # Coach personality + instructions
-│   │   ├── tools.ts              # Coach-specific tools (handoffs)
-│   │   └── index.ts
-│   │
-│   ├── goal-architect/
-│   │   ├── system-prompt.ts      # Goal Architect personality
-│   │   ├── tools.ts              # Goal creation, return-to-coach
-│   │   ├── expertise/            # Domain knowledge modules
-│   │   │   ├── implementation-intentions.ts
-│   │   │   ├── smart-criteria.ts
-│   │   │   └── goal-types.ts
-│   │   └── index.ts
-│   │
-│   ├── pattern-analyst/          # Future: MVP+1
-│   │   └── ...
-│   │
-│   ├── motivator/                # Future: MVP+1
-│   │   └── ...
-│   │
-│   └── accountability-partner/   # Future: MVP+2
-│       └── ...
-│
-├── memory/                       # Three-tier memory system
-│   ├── working-context.ts        # Per-invocation context assembly
-│   ├── session-state.ts          # Conversation-level state
-│   ├── long-term/
-│   │   ├── user-profile.ts       # User preferences, patterns
-│   │   ├── user-summary.ts       # Consolidated AI summary
-│   │   └── retrieval.ts          # RAG for check-in history
-│   └── types.ts
+└── agents/                         # Multi-Agent System
+    ├── types.ts                    # AgentState, AgentConfig, HandoffResult, AgentResponse
+    ├── index.ts                    # Barrel export (agents + re-exports memory)
+    ├── orchestrator.ts             # State machine, routing, handoff processing (future: MA-2.2)
+    ├── shared-tools.ts             # Tools available to all agents (future: MA-3.1)
+    │
+    ├── memory/                     # Three-Tier Memory System
+    │   ├── types.ts                # AgentId, WorkingContext, SessionMessage, etc.
+    │   ├── index.ts                # Memory barrel export
+    │   ├── session-state.ts        # Conversation-level state (MA-1.1)
+    │   ├── working-context.ts      # Per-invocation context assembly (MA-1.2)
+    │   └── long-term/
+    │       ├── index.ts
+    │       ├── user-profile.ts     # User preferences, patterns
+    │       ├── goals-summary.ts    # Goal data for context
+    │       └── engagement.ts       # Engagement status
+    │
+    ├── coach/                      # Coach Agent (future: MA-2.1)
+    │   ├── system-prompt.ts        # Coach personality + instructions
+    │   ├── tools.ts                # Coach-specific tools (handoffs)
+    │   └── index.ts
+    │
+    ├── goal-architect/             # Goal Architect Agent (future: MA-4.1)
+    │   ├── system-prompt.ts        # Goal Architect personality
+    │   ├── tools.ts                # Goal creation, return-to-coach
+    │   ├── expertise/              # Domain knowledge modules
+    │   │   ├── implementation-intentions.ts
+    │   │   ├── smart-criteria.ts
+    │   │   └── goal-types.ts
+    │   └── index.ts
+    │
+    ├── pattern-analyst/            # Future: MVP+1
+    │   └── ...
+    │
+    ├── motivator/                  # Future: MVP+1
+    │   └── ...
+    │
+    └── accountability-partner/     # Future: MVP+2
+        └── ...
 ```
 
 **MVP Implementation Sequence**
@@ -1256,8 +1258,7 @@ resolution-tracker/
 |---------|----------|
 | **Goal Management** | `features/goals/` + `app/(dashboard)/goals/` + `app/api/goals/` |
 | **Check-ins & Conversation** | `features/check-ins/` + `app/(dashboard)/check-in/` + `app/api/check-ins/` |
-| **Multi-Agent System** | `features/agents/` (orchestrator, coach, goal-architect, etc.) |
-| **Memory System** | `features/memory/` (working-context, session-state, long-term/) |
+| **Multi-Agent System** | `features/agents/` (orchestrator, coach, goal-architect, memory/) |
 | **Notion Integration** | `features/integrations/notion/` + `app/api/integrations/notion/` |
 | **Zapier Webhooks** | `features/integrations/zapier/` + `app/api/integrations/zapier/` |
 | **Auth** | `app/(auth)/` + `middleware.ts` |
@@ -1302,7 +1303,7 @@ resolution-tracker/
 **Structure Alignment:** Project structure supports all decisions
 - Vertical slice architecture accommodates all features
 - Clear boundaries between layers
-- `features/agents/` and `features/memory/` provide clear homes for multi-agent code
+- `features/agents/` provides a clear home for multi-agent code (including memory/ subdirectory)
 
 ### Requirements Coverage ✅
 
@@ -1310,7 +1311,7 @@ resolution-tracker/
 |-------------|----------------------|
 | Goal Management | `features/goals/` + API routes + Drizzle schema |
 | Conversational Check-ins | `features/check-ins/` + Vercel AI SDK `useChat` |
-| AI Agent Team with Memory | `features/agents/` (orchestrator, coach, goal-architect) + `features/memory/` (three-tier) |
+| AI Agent Team with Memory | `features/agents/` (orchestrator, coach, goal-architect, memory/) |
 | Visible Agent Handoffs | Tool-based transitions with announcement messages |
 | Magic Link Auth | Supabase Auth + middleware |
 | Notion Export | `features/integrations/notion/` + OAuth |
@@ -1437,7 +1438,7 @@ When implementing this architecture, AI agents MUST:
 2. Install dependencies: `npm install ai @ai-sdk/anthropic drizzle-orm drizzle-kit`
 3. Set up Drizzle schema and generate initial migration (include session state table)
 4. Configure environment variables
-5. Implement `features/memory/` (three-tier memory system)
+5. Implement `features/agents/memory/` (three-tier memory system)
 6. Implement `features/agents/orchestrator.ts` (state machine)
 7. Implement Coach agent (`features/agents/coach/`)
 8. Implement Goal Architect agent (`features/agents/goal-architect/`)
