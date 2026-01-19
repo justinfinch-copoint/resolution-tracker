@@ -15,6 +15,20 @@
       "when": 1768613753447,
       "tag": "0001_fair_star_brand",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1768853032314,
+      "tag": "0002_kind_puff_adder",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1768853796517,
+      "tag": "0003_famous_shadowcat",
+      "breakpoints": true
     }
   ]
 }

@@ -6,6 +6,13 @@ export const goalTypeEnum = pgEnum('goal_type', ['habit', 'target', 'project']);
 export const progressSentimentEnum = pgEnum('progress_sentiment', ['behind', 'on_track', 'ahead']);
 export const habitCompletionStatusEnum = pgEnum('habit_completion_status', ['completed', 'skipped', 'missed']);
 export const integrationTypeEnum = pgEnum('integration_type', ['notion', 'zapier']);
+export const activeAgentEnum = pgEnum('active_agent', [
+  'coach',
+  'goalArchitect',
+  'patternAnalyst',
+  'motivator',
+  'accountabilityPartner'
+]);
 
 // Profiles table - links auth.users to our public schema
 export const profiles = pgTable('profiles', {
@@ -28,6 +35,22 @@ export type IntegrationConfig = {
   syncEnabled?: boolean;
   lastSyncAt?: string;
   settings?: Record<string, unknown>;
+};
+
+// Session message with agent attribution
+export type SessionMessage = {
+  role: 'user' | 'assistant';
+  content: string;
+  agentId?: typeof activeAgentEnum.enumValues[number];  // Which agent sent this (for assistant messages)
+  timestamp: string; // ISO 8601
+};
+
+// Agent transition record
+export type AgentTransition = {
+  from: typeof activeAgentEnum.enumValues[number];
+  to: typeof activeAgentEnum.enumValues[number];
+  reason: string;
+  timestamp: string; // ISO 8601
 };
 
 // Goals table - enhanced with goal types, motivation, and tracking fields
@@ -127,6 +150,19 @@ export const integrations = pgTable('integrations', {
   index('integrations_user_id_idx').on(table.userId),
 ]);
 
+// Conversation sessions table (multi-agent session state)
+// Each user has exactly one active session (enforced by unique constraint)
+export const conversationSessions = pgTable('conversation_sessions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().unique().references(() => profiles.id, { onDelete: 'cascade' }),
+  activeAgent: activeAgentEnum('active_agent').notNull().default('coach'),
+  messages: jsonb('messages').$type<SessionMessage[]>().notNull().default([]),
+  agentTransitions: jsonb('agent_transitions').$type<AgentTransition[]>().notNull().default([]),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow().$onUpdate(() => new Date()),
+  expiresAt: timestamp('expires_at'),
+});
+
 // Type exports for use in features
 export type Profile = typeof profiles.$inferSelect;
 export type NewProfile = typeof profiles.$inferInsert;
@@ -142,6 +178,8 @@ export type UserSummary = typeof userSummaries.$inferSelect;
 export type NewUserSummary = typeof userSummaries.$inferInsert;
 export type Integration = typeof integrations.$inferSelect;
 export type NewIntegration = typeof integrations.$inferInsert;
+export type ConversationSession = typeof conversationSessions.$inferSelect;
+export type NewConversationSession = typeof conversationSessions.$inferInsert;
 
 // Export enums for use in application code
 export type GoalStatus = typeof goalStatusEnum.enumValues[number];
@@ -149,3 +187,4 @@ export type GoalType = typeof goalTypeEnum.enumValues[number];
 export type ProgressSentiment = typeof progressSentimentEnum.enumValues[number];
 export type HabitCompletionStatus = typeof habitCompletionStatusEnum.enumValues[number];
 export type IntegrationType = typeof integrationTypeEnum.enumValues[number];
+export type ActiveAgent = typeof activeAgentEnum.enumValues[number];
