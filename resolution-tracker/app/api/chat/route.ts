@@ -1,7 +1,11 @@
-import { createAgentUIStreamResponse, UIMessage } from 'ai';
+import { createAgentUIStreamResponse, type UIMessage } from 'ai';
 import { createClient } from '@/lib/supabase/server';
-import { buildChatContext, buildSystemPrompt, createCoachTools } from '@/src/features/ai-coach';
-import { createCoachAgent } from '@/src/features/ai-coach/agent';
+import {
+  getOrCreateSession,
+  addMessage,
+  createAgentForSession,
+  OrchestratorError,
+} from '@/src/features/agents';
 
 export async function POST(req: Request) {
   // 1. Auth check
@@ -34,25 +38,103 @@ export async function POST(req: Request) {
     );
   }
 
+  // 3. Extract the last user message
+  const lastUserMessage = uiMessages.filter(m => m.role === 'user').pop();
+  if (!lastUserMessage) {
+    return Response.json(
+      { error: 'No user message found', code: 'VALIDATION_ERROR' },
+      { status: 400 }
+    );
+  }
+
+  // Extract text content from message parts
+  const userMessageContent = lastUserMessage.parts
+    ?.filter((p): p is { type: 'text'; text: string } => p.type === 'text')
+    .map(p => p.text)
+    .join('') || '';
+
+  if (!userMessageContent) {
+    return Response.json(
+      { error: 'No message content found', code: 'VALIDATION_ERROR' },
+      { status: 400 }
+    );
+  }
+
   try {
-    // 3. Build context and system prompt
-    const context = await buildChatContext(user.id);
-    const systemPrompt = buildSystemPrompt(context);
+    // 4. Get or create session
+    const sessionResult = await getOrCreateSession(user.id);
+    if (!sessionResult.success) {
+      console.error('Session error:', sessionResult.error);
+      return Response.json(
+        { error: 'Failed to create session', code: sessionResult.error.code },
+        { status: 500 }
+      );
+    }
+    const session = sessionResult.data;
 
-    // 4. Create tools with userId bound
-    const tools = createCoachTools(user.id);
+    // 5. Add user message to session
+    const addMessageResult = await addMessage(session.id, user.id, {
+      role: 'user',
+      content: userMessageContent,
+      agentId: session.activeAgent,
+    });
 
-    // 5. Create agent with system prompt and tools
-    const agent = createCoachAgent(systemPrompt, tools);
+    if (!addMessageResult.success) {
+      console.error('Add message error:', addMessageResult.error);
+      return Response.json(
+        { error: 'Failed to save message', code: addMessageResult.error.code },
+        { status: 500 }
+      );
+    }
 
-    // 6. Stream agent response using createAgentUIStreamResponse
-    // This handles the async agent.stream() and converts to a Response
+    // Use the updated session with the new message
+    const updatedSession = addMessageResult.data;
+
+    // 6. Create agent for this session
+    const agent = await createAgentForSession(updatedSession, user.id);
+
+    // 7. Stream response using createAgentUIStreamResponse
     return createAgentUIStreamResponse({
       agent,
       uiMessages,
+      async onFinish({ responseMessage }) {
+        // Persist assistant message after stream completes
+        try {
+          if (responseMessage.role === 'assistant' && responseMessage.parts) {
+            const assistantContent = responseMessage.parts
+              .filter((p): p is { type: 'text'; text: string } => p.type === 'text')
+              .map(p => p.text)
+              .join('');
+
+            if (assistantContent) {
+              const result = await addMessage(updatedSession.id, user.id, {
+                role: 'assistant',
+                content: assistantContent,
+                agentId: updatedSession.activeAgent,
+              });
+
+              if (!result.success) {
+                console.error('Failed to persist assistant message:', result.error);
+              }
+            }
+          }
+        } catch (error) {
+          // Log but don't throw - user already received the response
+          console.error('Error persisting assistant message:', error);
+        }
+      },
     });
   } catch (error) {
     console.error('Chat API error:', error);
+
+    // Handle orchestrator-specific errors with proper codes
+    if (error instanceof OrchestratorError) {
+      return Response.json(
+        { error: error.message, code: error.code },
+        { status: 500 }
+      );
+    }
+
     return Response.json(
       { error: 'Failed to process chat request', code: 'INTERNAL_ERROR' },
       { status: 500 }

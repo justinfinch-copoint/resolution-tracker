@@ -1,12 +1,7 @@
 import { ToolLoopAgent, stepCountIs, type InferAgentUIMessage } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 import type { CoachTools } from './tools';
-
-// Configurable model via env var with sensible default
-const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-20250514';
-
-// Maximum tool call steps for goal setup conversations
-const MAX_AGENT_STEPS = 10;
+import { ANTHROPIC_MODEL, MAX_AGENT_STEPS } from '@/src/features/agents/config';
 
 /**
  * Create an AI Coach agent configured for the current request

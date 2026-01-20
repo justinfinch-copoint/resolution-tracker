@@ -43,3 +43,19 @@ export {
 // Re-export service result types
 export type { ServiceResult } from './memory';
 export type { WorkingContextResult, LongTermMemoryResult } from './memory';
+
+// Orchestrator
+export {
+  createAgentForSession,
+  agentRegistry,
+  getAgent,
+  getRegisteredAgentIds,
+  OrchestratorError,
+} from './orchestrator';
+
+// Agent config
+export { ANTHROPIC_MODEL, MAX_AGENT_STEPS, AI_TIMEOUT_MS } from './config';
+
+// Coach agent
+export { coachAgent, createCoachAgentTools } from './coach';
+export type { CoachTools } from './coach';
