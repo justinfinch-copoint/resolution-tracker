@@ -11,6 +11,7 @@ import { COACH_SYSTEM_PROMPT } from './system-prompt';
 
 export { createCoachAgentTools } from './tools';
 export type { CoachTools } from './tools';
+export { buildInitialGreeting } from './greeting';
 
 /**
  * Coach agent configuration.

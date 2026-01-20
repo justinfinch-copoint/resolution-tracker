@@ -1,11 +1,11 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { ChatErrorBoundary } from "@/src/features/ai-coach/components/chat-error-boundary";
+import { ChatErrorBoundary } from "@/src/features/chat";
 
 const ChatThread = dynamic(
   () =>
-    import("@/src/features/ai-coach/components/chat-thread").then(
+    import("@/src/features/chat").then(
       (mod) => mod.ChatThread
     ),
   { ssr: false }

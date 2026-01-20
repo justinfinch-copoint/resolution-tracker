@@ -1,13 +1,49 @@
-import type { ChatContext } from './types';
+/**
+ * Chat Context Builder
+ *
+ * Builds the complete chat context for the greeting route.
+ * Used by buildInitialGreeting to generate personalized greetings.
+ */
+
 import { getRecentUserCheckIns } from '@/src/features/check-ins/queries';
 import { getUserGoals } from '@/src/features/goals/queries';
-import { getUserSummaryData } from './summary-repository';
+import { getUserSummaryData } from './long-term/user-summary';
+import type { GoalType } from './types';
+
+// Re-export GoalType for consumers of ChatContext
+export type { GoalType } from './types';
 
 const DEFAULT_CHECK_IN_LIMIT = 15;
 
 /**
- * Build the complete chat context for AI prompts
- * Fetches: recent check-ins, user summary, active goals
+ * Chat context for AI prompts - used by greeting route.
+ */
+export type ChatContext = {
+  userId: string;
+  goals: Array<{
+    id: string;
+    title: string;
+    status: string;
+    goalType: GoalType;
+  }>;
+  recentCheckIns: Array<{
+    id: string;
+    goalId: string | null;
+    content: string;
+    aiResponse: string | null;
+    createdAt: string;
+  }>;
+  userSummary: {
+    patterns: string[];
+    wins: string[];
+    struggles: string[];
+    lastUpdated: string | null;
+  } | null;
+};
+
+/**
+ * Build the complete chat context for AI prompts.
+ * Fetches: recent check-ins, user summary, active goals.
  */
 export async function buildChatContext(userId: string): Promise<ChatContext> {
   // Fetch all data in parallel for performance

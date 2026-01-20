@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
-import { buildChatContext, buildInitialGreeting } from '@/src/features/ai-coach';
+import { buildChatContext } from '@/src/features/agents/memory/chat-context';
+import { buildInitialGreeting } from '@/src/features/agents/coach/greeting';
 
 export async function GET() {
   // 1. Auth check

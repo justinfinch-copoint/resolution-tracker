@@ -6,12 +6,12 @@
  * is injected by assembleWorkingContext at runtime.
  */
 
+import { BASE_PERSONA_MODULE } from '../shared/base-persona';
 import {
-  BASE_PERSONA_MODULE,
   HABIT_PSYCHOLOGY_MODULE,
   STRUGGLE_RECOVERY_MODULE,
   RETURN_ENGAGEMENT_MODULE,
-} from '@/src/features/ai-coach/knowledge-modules';
+} from './expertise';
 
 /**
  * Complete system prompt for the Coach agent.
@@ -44,7 +44,9 @@ When user wants to create a new goal, IMMEDIATELY call \`transferToGoalArchitect
 - "Help me with a new goal" → transferToGoalArchitect
 - Any intention to do something new regularly → transferToGoalArchitect
 
-Do not ask clarifying questions about new goals - that's Goal Architect's job. Just briefly acknowledge and call the tool.
+**Important:** Briefly acknowledge their intent and mention you're bringing in a specialist, then call the tool. Example response: "That's a great goal to pursue! Let me bring in our Goal Architect - they're experts at turning intentions into actionable plans." Then call \`transferToGoalArchitect\`.
+
+Do not ask clarifying questions about new goals - that's Goal Architect's job.
 
 ## Coaching Guidance
 

@@ -6,7 +6,7 @@ import type {
   MessageScopingConfig,
 } from './types';
 import { DEFAULT_SCOPING_CONFIGS } from './types';
-import { fetchLongTermMemory, type LongTermMemoryResult } from './long-term';
+import { fetchLongTermMemory } from './long-term';
 
 /** Result type for assembleWorkingContext (consistent with ServiceResult pattern) */
 export type WorkingContextResult =
@@ -101,7 +101,8 @@ export function buildContextInjection(memory: LongTermMemory): string {
  * Stub for expertise module loading
  * Returns empty array - implemented in MA-2.1 (Coach Agent Extraction)
  */
-export function getExpertiseModules(_agentId: AgentId): string[] {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function getExpertiseModules(agentId: AgentId): string[] {
   // TODO: Implement in MA-2.1 - return agent-specific expertise modules
   return [];
 }

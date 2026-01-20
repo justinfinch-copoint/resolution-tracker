@@ -8,18 +8,10 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import type { AgentId, HandoffResult } from './types';
+import { AGENT_DISPLAY_NAMES } from './constants';
 
-/**
- * Human-readable display names for agents.
- * Used in handoff announcements and UI.
- */
-export const AGENT_DISPLAY_NAMES: Record<AgentId, string> = {
-  coach: 'Coach',
-  goalArchitect: 'Goal Architect',
-  patternAnalyst: 'Pattern Analyst',
-  motivator: 'Motivator',
-  accountabilityPartner: 'Accountability Partner',
-};
+// Re-export for backward compatibility
+export { AGENT_DISPLAY_NAMES } from './constants';
 
 /**
  * Configuration for creating a handoff tool.

@@ -1,11 +1,17 @@
 export { getUserProfile } from './user-profile';
 export { getGoalsSummary } from './goals-summary';
 export { getEngagementContext } from './engagement';
+export {
+  getUserSummary,
+  getUserSummaryData,
+  upsertUserSummary,
+  mergeUserSummary,
+} from './user-summary';
 
 import { getUserProfile } from './user-profile';
 import { getGoalsSummary } from './goals-summary';
 import { getEngagementContext } from './engagement';
-import { getUserSummaryData } from '@/src/features/ai-coach/summary-repository';
+import { getUserSummaryData } from './user-summary';
 import type { LongTermMemory } from '../types';
 import { userIdSchema } from '../types';
 

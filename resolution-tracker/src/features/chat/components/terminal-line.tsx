@@ -1,6 +1,9 @@
 "use client";
 
+import { memo } from "react";
 import { cn } from "@/lib/utils";
+import { AGENT_DISPLAY_NAMES } from "@/src/features/agents/constants";
+import type { AgentId } from "@/src/features/agents/memory/types";
 
 type TerminalLineVariant = "user" | "ai" | "system";
 
@@ -8,20 +11,26 @@ interface TerminalLineProps {
   variant: TerminalLineVariant;
   content: string;
   isStreaming?: boolean;
+  agentId?: AgentId;
 }
 
-export function TerminalLine({
+// Memoized for performance with many messages (F13 fix)
+export const TerminalLine = memo(function TerminalLine({
   variant,
   content,
   isStreaming = false,
+  agentId,
 }: TerminalLineProps) {
-  const prefixMap: Record<TerminalLineVariant, string> = {
-    user: "> ",
-    ai: "COACH: ",
-    system: "SYSTEM: ",
+  // Dynamic prefix for AI messages based on agent, fallback to 'coach'
+  const getPrefix = () => {
+    if (variant === "user") return "> ";
+    if (variant === "system") return "SYSTEM: ";
+    // AI variant - use dynamic agent name
+    const displayName = AGENT_DISPLAY_NAMES[agentId ?? "coach"] ?? "Coach";
+    return `${displayName.toUpperCase()}: `;
   };
 
-  const prefix = prefixMap[variant];
+  const prefix = getPrefix();
 
   return (
     <div
@@ -31,7 +40,7 @@ export function TerminalLine({
         variant === "user"
           ? `You said: ${content}`
           : variant === "ai"
-            ? `Coach said: ${content}`
+            ? `${AGENT_DISPLAY_NAMES[agentId ?? "coach"]} said: ${content}`
             : undefined
       }
     >
@@ -60,7 +69,7 @@ export function TerminalLine({
       )}
     </div>
   );
-}
+});
 
 function renderContent(content: string) {
   // Simple markdown-like rendering for bold and italic

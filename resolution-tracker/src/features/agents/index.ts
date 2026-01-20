@@ -38,7 +38,16 @@ export {
   getGoalsSummary,
   getEngagementContext,
   ProfileNotFoundError,
+  // User summary (moved from ai-coach)
+  getUserSummary,
+  getUserSummaryData,
+  upsertUserSummary,
+  mergeUserSummary,
+  // Chat context (moved from ai-coach)
+  buildChatContext,
 } from './memory';
+
+export type { ChatContext } from './memory';
 
 // Re-export service result types
 export type { ServiceResult } from './memory';
@@ -57,7 +66,7 @@ export {
 export { ANTHROPIC_MODEL, MAX_AGENT_STEPS, AI_TIMEOUT_MS } from './config';
 
 // Coach agent
-export { coachAgent, createCoachAgentTools } from './coach';
+export { coachAgent, createCoachAgentTools, buildInitialGreeting } from './coach';
 export type { CoachTools } from './coach';
 
 // Goal Architect agent

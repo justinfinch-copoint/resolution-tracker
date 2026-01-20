@@ -27,7 +27,16 @@ export {
   getEngagementContext,
   ProfileNotFoundError,
   type LongTermMemoryResult,
+  // User summary functions (moved from ai-coach)
+  getUserSummary,
+  getUserSummaryData,
+  upsertUserSummary,
+  mergeUserSummary,
 } from './long-term';
+
+// Chat context (moved from ai-coach)
+export { buildChatContext } from './chat-context';
+export type { ChatContext, GoalType } from './chat-context';
 
 // Types
 export * from './types';

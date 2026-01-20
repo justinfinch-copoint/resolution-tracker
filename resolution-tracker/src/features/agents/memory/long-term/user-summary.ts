@@ -1,3 +1,10 @@
+/**
+ * User Summary Repository
+ *
+ * CRUD operations for user summaries (patterns, wins, struggles).
+ * Part of the long-term memory layer.
+ */
+
 import { db, userSummaries, UserSummary, UserSummaryData } from '@/src/db';
 import { eq } from 'drizzle-orm';
 

@@ -1,7 +1,7 @@
 /**
  * Base Persona Module
  *
- * Core personality and communication guidelines for the AI Coach.
+ * Core personality and communication guidelines for all agents.
  * Always included in system prompt regardless of context.
  */
 
