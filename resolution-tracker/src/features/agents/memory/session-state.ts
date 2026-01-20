@@ -201,7 +201,7 @@ export async function recordTransition(
     };
   }
 
-  const { to, reason } = parseResult.data;
+  const { to, reason, context } = parseResult.data;
 
   try {
     const result = await db.transaction(async (tx) => {
@@ -215,11 +215,12 @@ export async function recordTransition(
         return null;
       }
 
-      // Create transition record
+      // Create transition record (F1 fix: include context)
       const transition = {
         from: session.activeAgent,
         to,
         reason,
+        ...(context && { context }), // Only include if provided
         timestamp: new Date().toISOString(),
       };
 

@@ -59,3 +59,11 @@ export { ANTHROPIC_MODEL, MAX_AGENT_STEPS, AI_TIMEOUT_MS } from './config';
 // Coach agent
 export { coachAgent, createCoachAgentTools } from './coach';
 export type { CoachTools } from './coach';
+
+// Goal Architect agent
+export { goalArchitectAgent, createGoalArchitectTools } from './goal-architect';
+export type { GoalArchitectTools } from './goal-architect';
+
+// Shared tools
+export { createHandoffTool, AGENT_DISPLAY_NAMES } from './shared-tools';
+export type { HandoffToolConfig } from './shared-tools';

@@ -26,6 +26,7 @@ export const agentTransitionSchema = z.object({
   from: z.enum(AGENT_IDS),
   to: z.enum(AGENT_IDS),
   reason: z.string().min(1),
+  context: z.string().optional(), // Optional context passed from handoff tool
   timestamp: z.string().datetime(),
 });
 
@@ -38,6 +39,7 @@ export const addMessageInputSchema = z.object({
 export const recordTransitionInputSchema = z.object({
   to: z.enum(AGENT_IDS),
   reason: z.string().min(1),
+  context: z.string().optional(), // Optional context passed from handoff tool
 });
 
 // Input types
@@ -59,6 +61,7 @@ export type SessionResponse = {
     from: AgentId;
     to: AgentId;
     reason: string;
+    context?: string;
     timestamp: string;
   }>;
   createdAt: string;

@@ -14,6 +14,7 @@ import type { AgentConfig, AgentId } from './types';
 import type { SessionResponse } from './memory/types';
 import { assembleWorkingContext } from './memory';
 import { coachAgent, createCoachAgentTools } from './coach';
+import { goalArchitectAgent, createGoalArchitectTools } from './goal-architect';
 import { ANTHROPIC_MODEL, MAX_AGENT_STEPS, AI_TIMEOUT_MS } from './config';
 
 /**
@@ -35,23 +36,28 @@ export class OrchestratorError extends Error {
  * Phase 2: Only Coach registered.
  * Future agents will be added here as they're implemented.
  */
-export const agentRegistry: Record<AgentId, AgentConfig> = {
+export const agentRegistry: Partial<Record<AgentId, AgentConfig>> = {
   coach: coachAgent,
-  // Future agents (Phase 3+):
-  // goalArchitect: goalArchitectAgent,
+  goalArchitect: goalArchitectAgent,
+  // Future agents (Phase 4+):
   // patternAnalyst: patternAnalystAgent,
   // motivator: motivatorAgent,
   // accountabilityPartner: accountabilityPartnerAgent,
-} as Record<AgentId, AgentConfig>;
+};
 
 /**
  * Tool factory registry - maps agent IDs to their tool creation functions.
  * Each function takes userId and returns bound tools.
+ * Using 'any' for tool types as Vercel AI SDK's Tool generic is complex.
  */
-const toolFactoryRegistry: Record<AgentId, (userId: string) => ReturnType<typeof createCoachAgentTools>> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ToolFactory = (userId: string) => Record<string, any>;
+
+const toolFactoryRegistry: Partial<Record<AgentId, ToolFactory>> = {
   coach: createCoachAgentTools,
+  goalArchitect: createGoalArchitectTools,
   // Future agents will have their own tool factories
-} as Record<AgentId, (userId: string) => ReturnType<typeof createCoachAgentTools>>;
+};
 
 /**
  * Create an agent instance for processing messages.
@@ -91,6 +97,9 @@ export async function createAgentForSession(
 
   // Create tools with userId bound
   const tools = toolFactory(userId);
+
+  // Debug: Log available tools for this agent
+  console.log(`[Orchestrator] Creating agent '${agentId}' with tools:`, Object.keys(tools));
 
   // Assemble working context with exception handling
   let contextResult;
@@ -136,7 +145,10 @@ export function getAgent(agentId: AgentId): AgentConfig | undefined {
 }
 
 /**
- * Get all registered agent IDs.
+ * Get IDs of currently registered agents.
+ * Note: Returns only agents that have been registered in agentRegistry,
+ * NOT all possible AgentId values. Use AGENT_IDS for the full enum.
+ * @returns Array of registered agent IDs (subset of AgentId)
  */
 export function getRegisteredAgentIds(): AgentId[] {
   return Object.keys(agentRegistry) as AgentId[];

@@ -1,25 +1,42 @@
 /**
  * Coach Agent Tools
  *
- * Thin wrapper that imports and re-exports all tools from the ai-coach feature.
- * Actual tool implementations stay in ai-coach/tools.ts - this is just for
- * agent architecture consistency.
- *
- * Note: Handoff tools will be added here in Phase 3.
+ * Tools for ongoing coaching: check-ins, sentiment tracking, goal completion.
+ * Goal CREATION tools are in Goal Architect - Coach must hand off for new goals.
  */
 
-import { createCoachTools as createBaseCoachTools } from '@/src/features/ai-coach/tools';
+import { createCoachTools as createAllCoachTools } from '@/src/features/ai-coach/tools';
+import { createHandoffTool } from '../shared-tools';
 
 export type { CoachTools } from '@/src/features/ai-coach/tools';
 
 /**
  * Create Coach agent tools with userId bound.
- * Currently just re-exports base coach tools - handoff tools will be added in Phase 3.
+ * Only includes coaching tools - goal creation is handled by Goal Architect.
  *
  * @param userId - The authenticated user's ID
- * @returns All coach tools with userId bound
+ * @returns Coach tools (no goal creation)
  */
 export function createCoachAgentTools(userId: string) {
-  // Re-export all existing tools from ai-coach
-  return createBaseCoachTools(userId);
+  const allTools = createAllCoachTools(userId);
+
+  // Explicitly pick only the tools Coach should have (no goal creation tools)
+  return {
+    // Coaching tools - for tracking progress on EXISTING goals
+    recordCheckIn: allTools.recordCheckIn,
+    updateGoalSentiment: allTools.updateGoalSentiment,
+    completeMilestone: allTools.completeMilestone,
+    updateUserSummary: allTools.updateUserSummary,
+    markGoalComplete: allTools.markGoalComplete,
+    pauseGoal: allTools.pauseGoal,
+    resumeGoal: allTools.resumeGoal,
+
+    // Handoff tool - for NEW goals, transfer to Goal Architect
+    transferToGoalArchitect: createHandoffTool('goalArchitect', {
+      description:
+        'REQUIRED: Call this immediately when user wants to create a new goal. Trigger phrases: "I want to start...", "I want to begin...", "I need to...", "I should...", or any new goal intention. You cannot create goals - Goal Architect handles that.',
+      reasonDescription:
+        'Brief description of the goal intent (e.g., "User wants to start exercising regularly")',
+    }),
+  };
 }
